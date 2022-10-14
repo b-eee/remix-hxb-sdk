@@ -1,7 +1,7 @@
 import type { ActionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 
-import { logout } from "~/models/user.server";
+import { logout } from "~/service/user/user.server";
 
 export async function action({ request }: ActionArgs) {
   return logout(request);

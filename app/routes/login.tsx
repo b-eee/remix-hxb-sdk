@@ -6,8 +6,9 @@ import { createClient } from "@hexabase/hexabase-js";
 
 import { createUserSession } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
-import { UserInfo } from "~/entities/user";
-import { getUser } from "~/models/user.server";
+import { UserInfo } from "~/respone/user";
+import { getUser } from "~/service/user/user.server";
+import IconHxb from "../../public/hexabaseImage.svg"
 
 export const meta: MetaFunction = () => {
   return {
@@ -81,6 +82,7 @@ export default function LoginPage() {
   const actionData = useActionData<typeof action>();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {
@@ -93,7 +95,8 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
-        <Form method="post" className="space-y-6">
+        <img src={IconHxb} alt="Hexabase Logo"/>
+        <Form method="post" className="space-y-6 m-4">
           <div>
             <label
               htmlFor="email"
