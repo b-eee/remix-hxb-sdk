@@ -1,3 +1,4 @@
+# remix-hxb-sdk
 ## Development
 
 - Start dev server:
@@ -11,4 +12,9 @@
   Email: `nguyenpd@b-eee.com`
   Password: `123456`
   ```
-# remix-hxb-sdk
+## Run build
+  ```sh
+  yarn build
+
+  ./start.sh
+  ```
