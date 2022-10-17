@@ -2,12 +2,10 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { json, LoaderArgs, MetaFunction } from "@remix-run/node";
 
 import { getUser } from "~/service/user/user.server";
-import { UserInfo } from "~/respone/user";
 
 export async function loader({ request }: LoaderArgs) {
-  const user = await getUser(request);
+  const user: any = await getUser(request);
   if (user) return user;
-  return json({});
 }
 
 export const meta: MetaFunction = () => {
@@ -17,7 +15,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const user: UserInfo = useLoaderData<typeof loader>();
+  const user = useLoaderData<typeof loader>();
 
   return (
     <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
@@ -41,12 +39,12 @@ export default function Index() {
               <p className="mx-auto mt-6 max-w-lg text-center text-xl text-white sm:max-w-3xl">
               </p>
               <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
-                {user && user?.email ? (
+                {user && user?.userInfo?.email ? (
                   <Link
                     to="/workspace"
                     className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
                   >
-                    View workspace for {user?.email}
+                    View workspace for {user?.userInfo?.email}
                   </Link>
                 ) : (
                   <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">

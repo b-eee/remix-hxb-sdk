@@ -6,9 +6,9 @@ import { createClient } from "@hexabase/hexabase-js";
 
 import { createUserSession } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
-import { UserInfo } from "~/respone/user";
+import { UserInfo, UserInfoRes } from "~/respone/user";
 import { getUser } from "~/service/user/user.server";
-import IconHxb from "../../public/hexabaseImage.svg"
+import IconHxb from "../../public/assets/hexabaseImage.svg"
 
 export const meta: MetaFunction = () => {
   return {
@@ -17,9 +17,9 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderArgs) {
-  const user = await getUser(request);
-  if (user) return redirect("/");
-  return json({});
+  const user: any = await getUser(request);
+  if (user && user?.userInfo?.email) return redirect("/workspace");
+  else return json({});
 }
 
 export async function action({ request }: ActionArgs) {
@@ -95,7 +95,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
-        <img src={IconHxb} alt="Hexabase Logo"/>
+        <img src={IconHxb} alt="Hexabase Logo" />
         <Form method="post" className="space-y-6 m-4">
           <div>
             <label

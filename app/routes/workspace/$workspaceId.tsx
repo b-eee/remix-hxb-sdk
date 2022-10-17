@@ -3,43 +3,37 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useCatch, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
-import { deleteNote, getNote } from "~/service/note.server";
-// import { requireUserId } from "~/session.server";
+import { archiveWorkspace, getWorkspaceDetail } from "~/service/workspace/workspace.server";
 
 export async function loader({ request, params }: LoaderArgs) {
-  // const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
-
-  const note = await getNote({ userId, id: params.noteId });
-  if (!note) {
+  invariant(params.workspaceId, "noteId not found");
+  const wsDetail = await getWorkspaceDetail(request);
+  if (!wsDetail) {
     throw new Response("Not Found", { status: 404 });
   }
-  return json({ note });
+  return json({ wsDetail });
 }
 
 export async function action({ request, params }: ActionArgs) {
-  // const userId = await requireUserId(request);
-  invariant(params.noteId, "noteId not found");
-
-  await deleteNote({ userId, id: params.noteId });
-
-  return redirect("/notes");
+  invariant(params.workspaceId, "noteId not found");
+  await archiveWorkspace(request, { payload: { w_id: params?.workspaceId, archived: true } });
+  return redirect("/workspace");
 }
 
-export default function NoteDetailsPage() {
+export default function WorkspaceDetailsPage() {
   const data = useLoaderData<typeof loader>();
 
   return (
     <div>
-      <h3 className="text-2xl font-bold">{data.note.title}</h3>
-      <p className="py-6">{data.note.body}</p>
+      <h3 className="text-2xl font-bold">{data?.wsDetail?.workspace?.name}</h3>
+      {/* <p className="py-6">{data.note.body}</p> */}
       <hr className="my-4" />
       <Form method="post">
         <button
           type="submit"
           className="rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
         >
-          Delete
+          Archive
         </button>
       </Form>
     </div>

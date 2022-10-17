@@ -9,5 +9,5 @@ export async function getProject(request: Request, workspaceId: string) {
   const token = session.get(USER_TOKEN);
   const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
 
-  return await hexabase.applications.get(workspaceId);
+  return await hexabase.applications.getProjectsAndDatastores(workspaceId);
 }

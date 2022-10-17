@@ -1,17 +1,11 @@
-import { message } from 'antd';
-
-const key = 'updatable';
-type LoadingProps ={
-  loadingProps: boolean;
-}
-const Loading = ({loadingProps}:LoadingProps) => {
-  const openLoading = () => {
-    return loadingProps ? message.loading({ content: 'Loading...', key }) : message.success({ content: 'Loaded!', key, duration: 2 });
-  }
-
+export const Loading = () => {
   return (
-    <>{ openLoading() }</>
+    <>
+      <button type="button" className="bg-indigo-500 ..." disabled>
+        <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24">
+        </svg>
+        Processing...
+      </button>
+    </>
   )
 };
-
-export default Loading;

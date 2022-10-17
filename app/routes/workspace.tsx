@@ -1,28 +1,14 @@
 import * as React from "react";
-import { LoaderArgs, MetaFunction, redirect } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { LoaderArgs, MetaFunction, redirect, json, ActionArgs } from "@remix-run/node";
+import { Form, Link, NavLink, Outlet, useActionData, useFetcher, useLoaderData, useTransition } from "@remix-run/react";
 import Select from 'react-tailwindcss-select';
-import { getUser } from "~/service/user/user.server";
-import { getCurrentWorkspace, getWorkspaces } from "~/service/workspace/workspace.server";
-import { UserInfo } from "@hexabase/hexabase-js/dist/lib/types/user";
-import { WorkspaceCurrentRes, WorkspacesRes } from "~/respone/workspace";
-import { getProject } from "~/service/project/project.server";
-import { ApplicationRes } from "~/respone/project";
 
-export async function loader({ request }: LoaderArgs) {
-  let projects;
-  const user = await getUser(request);
-  const workspaces = await getWorkspaces(request);
-  const currWs = await getCurrentWorkspace(request);
-  if (!currWs?.error && currWs?.wsCurrent?.workspace_id) {
-    projects = await getProject(request, currWs?.wsCurrent?.workspace_id);
-  }
-  if (!user) return redirect("/");
-  if (!workspaces) return json([]);
-  if (!projects) return json([]);
-  return { user, workspaces, projects, currWs };
-}
+import { getUser } from "~/service/user/user.server";
+import { createWorkspace, getCurrentWorkspace, getWorkspaces } from "~/service/workspace/workspace.server";
+import { getProject } from "~/service/project/project.server";
+import PlusIcon from "../../public/assets/plus.svg";
+import SettingIcon from "../../public/assets/setting.svg";
+import Modal from "~/routes/workspace/New";
 
 export const meta: MetaFunction = () => {
   return {
@@ -30,65 +16,106 @@ export const meta: MetaFunction = () => {
   };
 };
 
-const options = [
-  { value: "fox", label: "🦊 Fox" },
-  { value: "Butterfly", label: "🦋 Butterfly" },
-  { value: "Honeybee", label: "🐝 Honeybee" },
-];
+export async function loader({ request }: LoaderArgs) {
+  let projects;
+  const user = await getUser(request);
+  const workspaces: any = await getWorkspaces(request);
+  const currWs: any = await getCurrentWorkspace(request);
+  // const url = new URL(request.url);
+  // const workspaceId = url.searchParams.get('');
+
+  if (!currWs?.error && currWs?.wsCurrent?.workspace_id) {
+    projects = await getProject(request, currWs?.wsCurrent?.workspace_id);
+  }
+
+  if (!user) return redirect("/");
+  return json({ user, workspaces, projects, currWs });
+}
+
+export async function action({ request }: ActionArgs) {
+  const formData = await request.formData();
+  const name = formData.get("nameWs");
+
+  if (typeof name !== "string" || name?.length === 0) {
+    return json(
+      { errors: { title: null, name: "Name is required" } },
+      { status: 400 }
+    );
+  }
+
+  const newWs = await createWorkspace(request, { name });
+
+  return redirect(`/workspace`);
+}
 
 export default function Workspace() {
-  const data: {
-    user: UserInfo,
-    workspaces: WorkspacesRes,
-    projects: ApplicationRes,
-    currWs: WorkspaceCurrentRes
-  } = useLoaderData<typeof loader>();
-  console.log(data);
+  // const fetcher = useFetcher();
+  const actionData = useActionData<typeof action>();
+  const data = useLoaderData<typeof loader>();
+  const user = data?.user;
+  const workspaces = data?.workspaces;
+  const projects = data?.projects;
+  const currWs = data?.currWs?.wsCurrent?.workspace_id;
+  const { state } = useTransition();
+  const loading = state === "loading";
 
-  const user: UserInfo = data?.user;
-  const workspaces: WorkspacesRes = data?.workspaces;
+  const [wsId, setWsId] = React.useState(null);
+  const [openModalCreateWs, setOpenModalCreateWs] = React.useState<boolean>(false);
+
   const convertWorkspaces = () => {
-    const result: { value?: string, label?: string }[] = []
-    workspaces?.workspaces?.workspaces?.map(ws => {
-      result.push({ value: ws?.workspace_id, label: ws?.workspace_name })
+    const result: any = [
+      { value: 0, label: `+ Create workspace` } //${<img src={PlusIcon}></img>}
+    ];
+    workspaces?.workspaces?.workspaces?.map((ws: any) => {
+      result.push({ value: ws?.workspace_id, label: ws?.workspace_name });
     });
     return result;
+  };
+
+  const setHiddenModal = (childData: boolean) => {
+    setOpenModalCreateWs(childData)
   }
-  const projects: ApplicationRes = data?.projects;
-  const currWs = data?.currWs?.wsCurrent?.workspace_id;
-  const [wsId, setWsId] = React.useState(null);
 
   const handleChange = (value: any) => {
+    // const params = new URLSearchParams();
+    // params.set('', value);
+    // fetcher.load(`?index&${params?.toString()}`);
+    if (value?.value === 0) {
+      setOpenModalCreateWs(!openModalCreateWs);
+    } else {
+      setOpenModalCreateWs(false);
+    }
     setWsId(value);
   };
+
+  React.useEffect(() => {
+    if (!actionData?.errors?.name) {
+      setOpenModalCreateWs(false);
+    }
+  }, [actionData]);
+
   return (
-    <>
+    <div>
+      {
+        openModalCreateWs && <Modal setHiddenModal={setHiddenModal} actionData={actionData} />
+      }
       <header className="flex items-center justify-between bg-slate-800 p-4 text-white h-auto">
         <h1 className="md:flex md:items-center md:justify-between md:w-1/6 text-3xl font-bold h-auto w-auto">
           <Link to="/">Home</Link>
           <div className="px-2"></div>
           <Select
-            value={wsId ?? currWs}
-            onChange={handleChange}
+            loading={loading}
+            value={wsId && wsId !== 0 ? wsId : currWs}
+            onChange={(e) => handleChange(e)}
             options={convertWorkspaces()}
             isSearchable={true}
           />
         </h1>
-        {
-          projects && !projects?.error && projects?.getApplications && projects?.getApplications?.length > 0 ?
-            <div>
-              {
-                projects?.getApplications?.map(project => {
-                  return (
-                    <p className="md:text-lg text-xs" key={project?.application_id}>{project?.name}</p>
-                  );
-                })
-              }
-            </div>
-            : <p className="md:text-lg text-xs">You can choose one workspace</p>
-        }
         <Form action="/logout" method="post" className="md:flex md:items-center md:justify-between md:p-6">
-          <p className="md:text-lg text-xs">{user?.email}</p>
+          {/* <p className="md:text-lg text-xs">{user?.email}</p> */}
+          <NavLink to={currWs}>
+            <img src={SettingIcon} alt={'setting'} />
+          </NavLink>
           <div className="px-2"></div>
           <button
             type="submit"
@@ -98,9 +125,34 @@ export default function Workspace() {
           </button>
         </Form>
       </header>
+      <div className="flex items-center justify-between w-full bg-black text-white">
+        <div>
+
+        </div>
+        {
+          projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
+            ?
+            <div className="lg:max-w-7xl md:max-w-3xl sm:max-w-xl flex items-center justify-between h-auto overflow-x-scroll">
+              {
+                projects?.appAndDs?.map(project => {
+                  return (
+                    <p className="md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 p-4 cursor-pointer" key={project?.application_id}>{project?.name}</p>
+                  );
+                })
+              }
+            </div>
+            :
+            <div className="flex items-center justify-center h-auto">
+              <p className="md:text-lg text-xs">Not have project</p>
+            </div>
+        }
+        <div className="">
+          <button>
+          </button>
+        </div>
+      </div>
 
       <main className="flex h-full bg-white">
-
         <aside className="w-64" aria-label="Sidebar">
           <div className="overflow-y-auto py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 min-h-screen">
             <ul className="space-y-2">
@@ -125,14 +177,16 @@ export default function Workspace() {
             </ul>
           </div>
         </aside>
-
+        <div className="flex-1 p-6">
+          <Outlet />
+        </div>
       </main>
 
-      <footer className="p-4 bg-gray-400 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-900 flex justify-center">
-        <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
+      <footer className="md:flex md:items-center md:justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900">
+        <span className="text-sm text-gray-800 sm:text-center dark:text-gray-400">
           © 2022 <a href="https://en.hexabase.com/our-company/" className="hover:underline">Hexabase すごい</a>
         </span>
       </footer>
-    </>
+    </div>
   );
 }
