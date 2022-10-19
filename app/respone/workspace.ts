@@ -21,3 +21,8 @@ export interface WorkspaceCurrentRes {
 	wsCurrent?: WorkspaceCurrent;
 	error?: string;
 }
+
+export interface WorkspacesRes {
+	workspaces?: Workspaces;
+	error?: string;
+}

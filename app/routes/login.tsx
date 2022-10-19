@@ -1,14 +1,15 @@
 import * as React from "react";
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, useActionData, useSearchParams, useTransition } from "@remix-run/react";
 import { createClient } from "@hexabase/hexabase-js";
 
 import { createUserSession } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
-import { UserInfo, UserInfoRes } from "~/respone/user";
+import { UserInfo } from "~/respone/user";
 import { getUser } from "~/service/user/user.server";
 import IconHxb from "../../public/assets/hexabaseImage.svg"
+import { Loading } from "~/component/Loading";
 
 export const meta: MetaFunction = () => {
   return {
@@ -53,6 +54,14 @@ export async function action({ request }: ActionArgs) {
   }
 
   const hexabase = await createClient({ url: baseUrl, token: "", email, password });
+
+  if (!hexabase) {
+    return json(
+      { errors: { email: "Invalid email or password", password: null } },
+      { status: 400 }
+    );
+  }
+
   const user = await hexabase.auth.login({ email, password });
 
   if (user && user?.token) {
@@ -60,7 +69,7 @@ export async function action({ request }: ActionArgs) {
     userInfoRes = userInfo;
   }
 
-  if (!user) {
+  if (!user || user?.error) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 }
@@ -69,7 +78,6 @@ export async function action({ request }: ActionArgs) {
 
   return createUserSession({
     request,
-    user: userInfoRes,
     token: user?.token,
     remember: remember === "on" ? true : false,
     redirectTo,
@@ -82,7 +90,9 @@ export default function LoginPage() {
   const actionData = useActionData<typeof action>();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const { state } = useTransition();
+  const loading = state === "loading";
+  const submit = state === "submitting";
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {
@@ -188,6 +198,9 @@ export default function LoginPage() {
           </div>
         </Form>
       </div>
+      
+      {loading && <Loading />}
+      {submit && <Loading />}
     </div>
   );
 }
