@@ -4,7 +4,7 @@ import { redirect } from "@remix-run/node";
 import { logout } from "~/service/user/user.server";
 
 export async function action({ request }: ActionArgs) {
-  return logout(request);
+  return await logout(request);
 }
 
 export async function loader() {

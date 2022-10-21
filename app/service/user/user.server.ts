@@ -5,6 +5,7 @@ import { getSession, sessionStorage } from "~/session.server";
 import { USER_SESSION_KEY, USER_TOKEN } from "~/constant/user";
 import { baseUrl } from "~/constant/url";
 import { UserInfo } from "~/respone/user";
+import { UserInfoRes } from "@hexabase/hexabase-js/dist/lib/types/user";
 
 // export async function getUserBySession(request: Request): Promise<UserInfo> {
 //   const session = await getSession(request);
@@ -19,14 +20,14 @@ import { UserInfo } from "~/respone/user";
 //   throw await logout(request);
 // }
 
-export async function getUser(request: Request) {
+export async function getUser(request: Request): Promise<UserInfoRes | undefined> {
   const session = await getSession(request);
   const token = session.get(USER_TOKEN);
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.users.get(token);
   } else {
-    return json({});
+    return undefined;
   }
 }
 

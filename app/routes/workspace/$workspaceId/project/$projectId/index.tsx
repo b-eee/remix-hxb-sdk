@@ -9,31 +9,46 @@ import { createProject, deleteProject, getDetailProject, getProject, updateProje
 import NewProject from './new';
 import UpdateProject from './update';
 import ModalConfirmDelete from './ModalConfirm';
+import Edit from "../../../../../../public/assets/edit.svg";
+import Plus from "../../../../../../public/assets/plus.svg";
+import Delete from "../../../../../../public/assets/delete.svg";
+import { TableDataStore } from '~/component/tableDs';
+import { createDatastore, getDatastore } from '~/service/datastore/datastore.server';
+import { DEFAULT_LANG_CD_DS, DEFAULT_TEMPLATE_DS } from '~/constant/datastore';
+import { getUser } from '~/service/user/user.server';
 
 export async function loader({ request, params }: LoaderArgs) {
   invariant(params?.projectId, 'projectId not found');
 
   let projectDetail;
+  let datastores;
   if (params?.projectId) {
     projectDetail = await getDetailProject(request, params?.projectId);
+    datastores = await getDatastore(request, params?.projectId);
   }
   if (!projectDetail || !projectDetail?.project) {
     throw new Response('Not Found', { status: 404 });
   }
-  return json({ projectDetail });
+  return json({ projectDetail, datastores });
 }
 
 export async function action({ request, params }: ActionArgs) {
   invariant(params?.projectId, 'projectId not found');
+  invariant(params?.workspaceId, 'workspaceId not found');
 
   let projects;
   let application_id_fist: string = '';
   let projectDetail = await getDetailProject(request, params?.projectId);
-
   const formData = await request.formData();
-  if (params?.workspaceId) {
-    projects = await getProject(request, params?.workspaceId);
+  const userCurr = await getUser(request);
+  const payload = {
+    lang_cd: DEFAULT_LANG_CD_DS,
+    project_id: params?.projectId,
+    template_name: DEFAULT_TEMPLATE_DS,
+    workspace_id: params?.workspaceId,
+    user_id: userCurr?.userInfo?.u_id,
   }
+
   const nameProjectEnCreate = formData.get('nameProjectEnCreate');
   const nameProjectJpCreate = formData.get('nameProjectJpCreate');
   const nameProjectEnUpdate = formData.get('nameProjectEnUpdate');
@@ -41,8 +56,13 @@ export async function action({ request, params }: ActionArgs) {
   const displayIdProject = formData.get('displayIdProject');
   const namePrjDelete = formData.get('namePrjDelete');
   const typeCreate = formData.get('create');
+  const typeCreateDs = formData.get('createDs');
   const typeUpdate = formData.get('update');
   const typeDelete = formData.get('delete');
+
+  if (params?.workspaceId) {
+    projects = await getProject(request, params?.workspaceId);
+  }
 
   if (typeCreate === 'create') {
     if (typeof nameProjectEnCreate !== 'string' || nameProjectEnCreate?.length === 0) {
@@ -107,7 +127,7 @@ export async function action({ request, params }: ActionArgs) {
     }
 
     const deletePrj = await deleteProject(request, { payload: { project_id: params?.projectId } });
-    
+
     if (projects && projects?.appAndDs && projects?.appAndDs[0]?.application_id) {
       application_id_fist = projects?.appAndDs[0]?.application_id;
     } else {
@@ -120,6 +140,10 @@ export async function action({ request, params }: ActionArgs) {
 
   }
 
+  if (typeCreateDs === 'createDs') {
+    const newDs = await createDatastore(request, { payload });
+  }
+
   return redirect(`workspace/${params?.workspaceId}/project/${projectDetail?.project?.p_id}`);
 }
 
@@ -127,6 +151,7 @@ export default function ProjectDetailsPage() {
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const projectDetail = data?.projectDetail;
+  const datastores: any = data?.datastores;
   const { state } = useTransition();
   const loading = state === 'loading';
   const submit = state === 'submitting';
@@ -135,6 +160,8 @@ export default function ProjectDetailsPage() {
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
+  const [openUpdateModalDatastore, setOpenUpdateModalDatastore] = useState<boolean>(false);
+  const [confirmDatastore, setConfirmDatastore] = useState<boolean>(false);
 
   const setHiddenCreate = (childData: boolean) => {
     setOpenNewModal(childData);
@@ -146,6 +173,14 @@ export default function ProjectDetailsPage() {
 
   const setHiddenConfirm = (childData: boolean) => {
     setConfirm(childData);
+  }
+
+  const setHiddenUpdateDatastore = (childData: boolean) => {
+    setOpenUpdateModalDatastore(childData);
+  }
+
+  const setHiddenConfirmDatastore = (childData: boolean) => {
+    setConfirmDatastore(childData);
   }
 
   React.useEffect(() => {
@@ -172,27 +207,30 @@ export default function ProjectDetailsPage() {
         <h3 className='text-2xl font-bold'>{projectDetail?.project?.name}</h3>
         <div>
           <button
-            onClick={() => setOpenNewModal(!openNewModal)}
-            className='text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800'
+            onClick={() => { setOpenNewModal(!openNewModal), setOpenUpdateModal(false), setConfirm(false) }}
+            className='transition ease-in-out delay-75 hover:-translate-y-1 hover:scale-110 duration-300 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
           >
-            Create
+            <img src={Plus} alt="edit" width={15} height={15} className='mr-2' />
+            New
           </button>
           <button
-            onClick={() => setOpenUpdateModal(!openUpdateModal)}
-            className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'
+            onClick={() => { setOpenUpdateModal(!openUpdateModal), setOpenNewModal(false), setConfirm(false) }}
+            className='transition ease-in-out delay-75 hover:-translate-y-1 hover:scale-110 duration-300 mx-4 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-green-300 focus:outline-none focus:ring-2 focus:green-indigo-500 focus:ring-offset-2'
           >
+            <img src={Edit} alt="edit" width={15} height={15} className='mr-2' />
             Update
           </button>
           <button
-            onClick={() => setConfirm(!confirm)}
-            className='text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800'
+            onClick={() => { setConfirm(!confirm), setOpenUpdateModal(false), setOpenNewModal(false) }}
+            className='transition ease-in-out delay-75 hover:-translate-y-1 hover:scale-110 duration-300 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
           >
+            <img src={Delete} alt="edit" width={15} height={15} className='mr-2' />
             Delete
           </button>
         </div>
       </div>
       <hr className='my-4' />
-      <div className='py-7'>
+      <div className='flex items-center justify-start my-7'>
         <div className='py-3'>
           <label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project name</label>
           <input
@@ -201,10 +239,10 @@ export default function ProjectDetailsPage() {
             type='text'
             name='nameProjectEnUpdate'
             id='nameProjectEnUpdate'
-            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+            className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:placeholder-gray-400 dark:text-white'
           />
         </div>
-
+        <div className='mx-2'></div>
         <div className='py-3'>
           <input type={'hidden'} name={'update'} value={'update'} />
           <label htmlFor='displayId' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project ID</label>
@@ -214,13 +252,15 @@ export default function ProjectDetailsPage() {
             type='text'
             name='displayId'
             id='displayId'
-            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+            className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:placeholder-gray-400 dark:text-white'
           />
         </div>
       </div>
+      <TableDataStore data={datastores} onClickDeleteModal={() => { }} onClickUpdateModal={() => { }} />
 
       {loading && <Loading />}
       {submit && <Loading />}
+
       {openNewModal && <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} />}
       {openUpdateModal && <UpdateProject actionData={actionData} setHiddenModal={setHiddenUpdate} />}
       {confirm && <ModalConfirmDelete actionData={actionData} setHiddenConfirm={setHiddenConfirm} />}

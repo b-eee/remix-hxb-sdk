@@ -1,11 +1,13 @@
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useTransition } from "@remix-run/react";
 import { json, LoaderArgs, MetaFunction } from "@remix-run/node";
 
 import { getUser } from "~/service/user/user.server";
+import { Loading } from "~/component/Loading";
 
 export async function loader({ request }: LoaderArgs) {
   const user: any = await getUser(request);
   if (user) return user;
+  else return json({});
 }
 
 export const meta: MetaFunction = () => {
@@ -16,7 +18,10 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const user = useLoaderData<typeof loader>();
-
+  const { state } = useTransition();
+  const loading = state === "loading";
+  const submit = state === "submitting";
+  
   return (
     <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
       <div className="relative sm:pb-16 sm:pt-8">
@@ -68,6 +73,9 @@ export default function Index() {
           </div>
         </div>
       </div>
+
+      {loading && <Loading />}
+      {submit && <Loading />}
     </main>
   );
 }

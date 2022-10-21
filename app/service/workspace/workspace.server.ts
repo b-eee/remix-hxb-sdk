@@ -7,7 +7,7 @@ import { baseUrl } from "~/constant/url";
 import { ArchiveWorkspace, CreateWsInput, SetWsInput } from "~/input/workspaceInput";
 import { WorkspaceCurrentRes, WorkspacesRes } from "~/respone/workspace";
 import { WorkspaceDetailRes, WorkspaceIDRes, WorkspaceSettingReq } from "@hexabase/hexabase-js/dist/lib/types/workspace";
-import { ResponseErrorNull } from "@hexabase/hexabase-js/dist/lib/util/type";
+import { ModelRes, ResponseErrorNull } from "@hexabase/hexabase-js/dist/lib/util/type";
 
 export async function getWorkspaces(request: Request): Promise<WorkspacesRes | undefined> {
   const session = await getSession(request);
@@ -32,7 +32,7 @@ export async function getCurrentWorkspace(request: Request): Promise<WorkspaceCu
   }
 }
 
-export async function setCurrentWorkspace(request: Request, wsInput: SetWsInput): Promise<any> {
+export async function setCurrentWorkspace(request: Request, wsInput: SetWsInput): Promise<ModelRes | undefined> {
   const session = await getSession(request);
   const token = session.get(USER_TOKEN);
 
@@ -40,7 +40,7 @@ export async function setCurrentWorkspace(request: Request, wsInput: SetWsInput)
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.workspaces.setCurrent(wsInput);
   } else {
-    return json({});
+    return undefined;
   }
 }
 
