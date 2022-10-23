@@ -142,7 +142,7 @@ export default function WorkspaceDetailsPage() {
       <Form method="post">
         <input type={'hidden'} name={'update'} value={'update'} />
         <div className="py-3">
-          <label htmlFor="displayIdWs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Workspace admin</label>
+          <label htmlFor="displayIdWs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800">Workspace admin</label>
           <input
             readOnly
             defaultValue={userAdminWs ?? undefined}
@@ -151,7 +151,7 @@ export default function WorkspaceDetailsPage() {
             type="text"
             name="displayIdWs"
             id="displayIdWs"
-            className="bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:placeholder-gray-400 dark:text-white"
+            className="bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
             placeholder="workspace name"
             autoComplete="displayIdWs"
             aria-invalid={actionData?.errors?.name ? true : undefined}
@@ -165,7 +165,7 @@ export default function WorkspaceDetailsPage() {
         </div>
 
         <div className="py-3">
-          <label htmlFor="nameWsUpdate" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Workspace name</label>
+          <label htmlFor="nameWsUpdate" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800">Workspace name</label>
           <input
             defaultValue={wsDetail?.workspace?.name ?? undefined}
             autoFocus={true}
@@ -173,7 +173,7 @@ export default function WorkspaceDetailsPage() {
             type="text"
             name="nameWsUpdate"
             id="nameWsUpdate"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:placeholder-gray-400 dark:text-white"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
             placeholder="workspace name"
             autoComplete="nameWsUpdate"
             aria-invalid={actionData?.errors?.name ? true : undefined}

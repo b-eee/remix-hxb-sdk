@@ -23,9 +23,10 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal }:
       <div className="overflow-x-auto relative">
         <div className="flex items-center justify-between">
           {
-            lengthDs >= 5 && <div className="p-5 bg-green-300 text-base font-semibold text-red-400">
+            lengthDs >= 5 ? <div className="p-5 bg-green-300 text-base font-semibold text-red-400">
               Cannot create a new database, the limit has been exceeded.
             </div>
+            : <div></div>
           }
           <Form method="post">
             <input type={'hidden'} name={'createDs'} value={'createDs'} />

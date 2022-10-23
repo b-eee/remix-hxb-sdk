@@ -126,9 +126,9 @@ export default function Workspace() {
       setOpenModalCreateWs(!openModalCreateWs);
     } else {
       setOpenModalCreateWs(false);
+      navigate(`${value?.value}-sl`, { replace: true });
     }
     setWsSelect(value);
-    navigate(`${value?.value}-sl`, { replace: true });
   };
 
   return (
@@ -164,7 +164,7 @@ export default function Workspace() {
         </div>
       </header>
       
-      <div className="flex items-center justify-center w-full bg-black text-white h-auto overflow-x-scroll">
+      <div className="flex items-center justify-center w-full bg-black text-white h-auto overflow-x-scroll scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
           ? <div className="lg:max-w-7xl md:max-w-3xl sm:max-w-xl flex items-center justify-between h-auto">
             {projects?.appAndDs?.map((project) => {
@@ -184,7 +184,7 @@ export default function Workspace() {
         }
       </div>
 
-      <main className="flex h-full bg-white">
+      <main className="flex h-auto bg-white">
         <Sidebar data={undefined} hiddenDropdownSidebar={hiddenDropdownSidebar} onClick={() => setHiddenDropdownSidebar} />
 
         <div className="flex-1 p-6">
