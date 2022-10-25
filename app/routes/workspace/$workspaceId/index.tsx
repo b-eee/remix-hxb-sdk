@@ -3,6 +3,8 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useCatch, useLoaderData, useTransition } from "@remix-run/react";
 import React, { useState } from "react";
 import invariant from "tiny-invariant";
+import { ButtonDelete } from "~/component/button/buttonDelete";
+import { ButtonUpdate } from "~/component/button/buttonUpdate";
 
 import { Loading } from "~/component/Loading";
 import { archiveWorkspace, getWorkspaceDetail, getWorkspaces, setCurrentWorkspace, updateWorkspace } from "~/service/workspace/workspace.server";
@@ -10,14 +12,14 @@ import ConfirmDeleteWs from "./ModalConfirm";
 
 export async function loader({ request, params }: LoaderArgs) {
   invariant(params?.workspaceId, "workspaceId not found");
-  const setCurrWs = await setCurrentWorkspace(request, { workspace_id: params?.workspaceId?.split('-')[0] });
   const wsDetail = await getWorkspaceDetail(request);
 
   if (!wsDetail) {
     throw new Response("Not Found", { status: 404 });
   }
-  if (setCurrWs?.data?.success && params?.workspaceId?.split('-')[1] === 'sl') {
-    return redirect('/workspace');
+  if (params?.workspaceId?.split('-')[1] === 'sl') {
+    const setCurrWs = await setCurrentWorkspace(request, { workspace_id: params?.workspaceId?.split('-')[0] });
+    return setCurrWs?.data?.success ? redirect('/workspace') : redirect('/');
   }
   return json({ wsDetail });
 }
@@ -61,7 +63,7 @@ export async function action({ request, params }: ActionArgs) {
     return redirect(`/workspace/${workspace_id_fist}`);
   }
 
-  if (typeUpdate !== 'update') {
+  if (typeUpdate === 'update') {
     if (typeof nameWsUpdate !== "string" || nameWsUpdate?.length === 0) {
       return json(
         { errors: { title: null, name: "Name is required" } },
@@ -130,13 +132,7 @@ export default function WorkspaceDetailsPage() {
     <div>
       <div className="flex justify-between items-center">
         <h3 className="text-2xl font-bold">{wsDetail?.workspace?.name}</h3>
-        <button
-          onClick={() => setConfirm(!confirm)}
-          type="submit"
-          className="rounded bg-red-600 py-2 px-4 text-white hover:bg-red-700 focus:bg-red-800 transition ease-in-out delay-75 hover:-translate-y-1 hover:scale-110 duration-300"
-        >
-          Archive
-        </button>
+        <ButtonDelete text="Archive" onClick={() => setConfirm(!confirm)} />
       </div>
       <hr className="my-4" />
       <Form method="post">
@@ -185,12 +181,7 @@ export default function WorkspaceDetailsPage() {
             </div>
           )}
         </div>
-
-        <button
-          className="transition ease-in-out delay-75 hover:-translate-y-1 hover:scale-110 duration-300 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-        >
-          Update
-        </button>
+        <ButtonUpdate text="Update" />
       </Form>
 
       {loading && <Loading />}

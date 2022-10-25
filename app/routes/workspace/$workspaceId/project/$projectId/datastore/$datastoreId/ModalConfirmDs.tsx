@@ -1,36 +1,21 @@
-import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { Form, useLoaderData, useTransition } from '@remix-run/react';
+import { Form, useTransition } from '@remix-run/react';
+import { Datastores } from '@hexabase/hexabase-js/dist/lib/types/datastore';
 import React, { useState } from 'react';
-import invariant from 'tiny-invariant';
-import { json, redirect } from '@remix-run/node';
 
 import { Loading } from '~/component/Loading';
-import { getDetailProject } from '~/service/project/project.server';
+import { Input } from '~/component/input';
 import { ButtonDelete } from '~/component/button/buttonDelete';
 
 interface ModalProps {
   setHiddenConfirm: (childData: boolean) => void;
   actionData: any;
-}
-
-export async function loader({ request, params }: LoaderArgs) {
-  invariant(params?.projectId, 'projectId not found');
-
-  let projectDetail;
-  if (params?.projectId) {
-    projectDetail = await getDetailProject(request, params?.projectId);
-  }
-  if (!projectDetail || !projectDetail?.project) {
-    throw new Response('Not Found', { status: 404 });
-  }
-  return json({ projectDetail });
+  dsDetail?: Datastores;
 }
 
 
-export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: ModalProps) {
+export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsDetail }: ModalProps) {
   const [open, setOpen] = useState('');
-  const namePrjDeleteRef = React.useRef<HTMLInputElement>(null);
-  const { projectDetail } = useLoaderData<typeof loader>();
+  const nameDsDeleteRef = React.useRef<HTMLInputElement>(null);
   const { state } = useTransition();
   const loading = state === 'loading';
   const submit = state === 'submitting';
@@ -53,23 +38,23 @@ export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: Mod
               <svg aria-hidden='true' className='w-5 h-5' fill='currentColor' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'><path fillRule='evenodd' d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z' clipRule='evenodd'></path></svg>
             </button>
             <div className='py-6 px-6 lg:px-8'>
-              <h3 className='box-decoration-clone bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded p-2 mb-4 text-xl font-medium mr-5 dark:text-white'>Delete project</h3>
+              <h3 className='box-decoration-clone bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded p-2 mb-4 text-xl font-medium mr-5 dark:text-white'>Delete datastore</h3>
+              <p>Are you sure ?</p>
+              <p className='text-sm font-medium text-gray-900 dark:text-gray-300 pb-2'>Please input the following to confirm deletion: {dsDetail?.name}</p>
               <Form method='post' className='space-y-6'>
                 <div>
-                  <input type={'hidden'} name={'delete'} value={'delete'} />
-                  <p className='text-sm font-medium text-gray-900 dark:text-gray-300 pb-2'>All of the resources in the Project will be Deleted.</p>
-                  <label htmlFor='namePrjDelete' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Please input the following to confirm deletion: {projectDetail?.project?.name} </label>
-                  <input
+                  <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Datastore name</label>
+                  <input type={'hidden'} name={'deleteDs'} value={'deleteDs'} />
+                  <input type={'hidden'} name={'nameDsDetail'} value={dsDetail?.name} />
+                  <input type={'hidden'} name={'idDsDetail'} value={dsDetail?.d_id} />
+                  <Input
+                  readOnly={false}
                     autoFocus={true}
-                    ref={namePrjDeleteRef}
-                    type='text'
-                    name='namePrjDelete'
-                    id='namePrjDelete'
-                    className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-                    placeholder='workspace name'
-                    autoComplete='namePrjDelete'
+                    refs={nameDsDeleteRef}
+                    name='nameDsDelete'
+                    id='nameDsDelete'
+                    placeholder='Datastore name'
                     aria-invalid={actionData?.errors?.name ? true : undefined}
-                    aria-describedby='namePrjDelete-error'
                   />
                   {actionData?.errors?.name && (
                     <div className='pt-1 text-red-700' id='email-error'>
@@ -77,7 +62,7 @@ export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: Mod
                     </div>
                   )}
                 </div>
-                <ButtonDelete text='Delete'/>
+                <ButtonDelete text='delete'/>
               </Form>
             </div>
           </div>

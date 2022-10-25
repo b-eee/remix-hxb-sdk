@@ -6,7 +6,7 @@ import { baseUrl } from '~/constant/url';
 import { AppAndDsRes, CreateAppRes, CreateProjectPl, DeleteProjectPl, ProjectInfoRes, UpdateProjectNamePl } from '@hexabase/hexabase-js/dist/lib/types/application';
 import { ModelRes } from '@hexabase/hexabase-js/dist/lib/util/type';
 
-export async function getProject(request: Request, workspaceId: string): Promise<AppAndDsRes | undefined> {
+export async function getProjectsAndDatastores(request: Request, workspaceId: string): Promise<AppAndDsRes | undefined> {
   const session = await getSession(request);
   const token = session.get(USER_TOKEN);
   if (token) {
