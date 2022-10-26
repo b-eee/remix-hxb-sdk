@@ -3,6 +3,7 @@ import { ModelRes } from "@hexabase/hexabase-js/dist/lib/util/type";
 import {
   CreateDatastoreFromSeedReq,
   CreateDatastoreFromSeedRes,
+  DatastoreGetFieldsRes,
   DatastoreRes,
   DatastoreSettingRes,
   DatastoreUpdateSetting,
@@ -25,12 +26,12 @@ export async function getDatastore(request: Request, projectId: string): Promise
   }
 }
 
-export async function getDetailDatastore(request: Request, projectId: string): Promise<DatastoreSettingRes | undefined> {
+export async function getDetailDatastore(request: Request, datastoreId: string): Promise<DatastoreSettingRes | undefined> {
   const session = await getSession(request);
   const token = session.get(USER_TOKEN);
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.getDetail(projectId);
+    return await hexabase.datastores.getDetail(datastoreId);
   } else {
     return undefined;
   }
@@ -79,3 +80,15 @@ export async function deleteDatastore(request: Request, datastoreId: string): Pr
     return undefined;
   }
 }
+
+export async function getFields(request: Request, datastoreId: string, projectId: string): Promise<DatastoreGetFieldsRes | undefined> {
+  const session = await getSession(request);
+  const token = session.get(USER_TOKEN);
+  if (token) {
+    const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
+    return await hexabase.datastores.getFields(datastoreId, projectId);
+  } else {
+    return undefined;
+  }
+}
+

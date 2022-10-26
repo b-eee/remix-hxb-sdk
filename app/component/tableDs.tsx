@@ -67,7 +67,7 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, a
                 return (
                   <tr key={ds?.d_id} className='bg-white hover:bg-gray-100 border-b'>
                     <td className="text-xs text-gray-70 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">{index + 1}</td>
-                    <td className="text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-400 py-4 px-6"> <Link to={`datastore/${ds?.d_id}`}>{ds?.name}</Link></td>
+                    <td className="text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-400 py-4 px-6"> <Link to={`datastore/${ds?.d_id}`} className='lg:text-sm text-blue-400 hover:underline hover:decoration-blue-400'>{ds?.name}</Link></td>
                     <td className="text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">{ds?.display_id}</td>
                     <td className="py-4 px-6 dark:bg-gray-700 dark:text-gray-400 flex items-center justify-start w-auto">
                       <ButtonUpdate onClick={() => onClickUpdateModal(ds)} text={'Update'} className='mx-4' />

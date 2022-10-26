@@ -1,42 +1,51 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { useActionData, useCatch, useLoaderData, useTransition } from '@remix-run/react';
+import { useActionData, useCatch, useFetcher, useLoaderData, useNavigate, useTransition } from '@remix-run/react';
 import React, { useState } from 'react';
 import invariant from 'tiny-invariant';
-import { Datastores } from '@hexabase/hexabase-js/dist/lib/types/datastore';
 
 import { Loading } from '~/component/Loading';
 import { createProject, deleteProject, getDetailProject, getProjectsAndDatastores, updateProjectName } from '~/service/project/project.server';
 import NewProject from '../../new';
 import UpdateProject from '../../update';
 import ModalConfirmDelete from '../../ModalConfirm';
-import { TableDataStore } from '~/component/tableDs';
-import { createDatastore, deleteDatastore, getDatastore, updateDatastore, validateDatastoreDisplayID } from '~/service/datastore/datastore.server';
+import { createDatastore, deleteDatastore, getDatastore, getDetailDatastore, getFields, updateDatastore, validateDatastoreDisplayID } from '~/service/datastore/datastore.server';
 import { DEFAULT_LANG_CD_DS, DEFAULT_TEMPLATE_DS } from '~/constant/datastore';
 import { getUser } from '~/service/user/user.server';
-import { ButtonNew } from '~/component/button/buttonNew';
-import { ButtonUpdate } from '~/component/button/buttonUpdate';
-import { ButtonDelete } from '~/component/button/buttonDelete';
-import ModalConfirmDeleteDs from './ModalConfirmDs';
-import ModalUpdateDatastore from './updateDs';
+import Select from 'react-tailwindcss-select';
+import { getItems } from '~/service/item/user.server';
 
 export async function loader({ request, params }: LoaderArgs) {
   invariant(params?.projectId, 'projectId not found');
   invariant(params?.workspaceId, 'workspaceId not found');
+  invariant(params?.datastoreId, 'datastoreId not found');
 
   let projectDetail;
   let datastores;
   let appAndDs;
+  let dsDetail;
+  const paramsItem = {
+    use_or_condition: false,
+    sort_field_id: "",
+    page: 1,
+    per_page: 20,
+  };
+  const projectId = params?.projectId;
+  const workspaceId = params?.workspaceId;
+  const datastoreId = params?.datastoreId;
+  const fieldsDs = await getFields(request, datastoreId, projectId);
+  const items = await getItems(request, paramsItem, datastoreId, projectId);
 
-  if (params?.projectId && params?.workspaceId) {
-    projectDetail = await getDetailProject(request, params?.projectId);
-    datastores = await getDatastore(request, params?.projectId);
-    appAndDs = await getProjectsAndDatastores(request, params?.workspaceId)
+  if (projectId && workspaceId && datastoreId) {
+    projectDetail = await getDetailProject(request, projectId);
+    datastores = await getDatastore(request, projectId);
+    appAndDs = await getProjectsAndDatastores(request, workspaceId);
+    dsDetail = await getDetailDatastore(request, datastoreId)
   }
-  if (!projectDetail || !projectDetail?.project) {
+  if (!dsDetail || !dsDetail?.datastoreSetting) {
     throw new Response('Not Found', { status: 404 });
   }
-  return json({ projectDetail, datastores, appAndDs });
+  return json({ projectDetail, datastores, appAndDs, dsDetail, projectId, workspaceId, datastoreId, fieldsDs, items });
 }
 
 export async function action({ request, params }: ActionArgs) {
@@ -220,22 +229,27 @@ export async function action({ request, params }: ActionArgs) {
 }
 
 export default function ItemDetailsPage() {
+  const navigate = useNavigate();
+  const fetcher = useFetcher();
   const data = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
-  const projectDetail = data?.projectDetail;
   const datastores = data?.datastores;
-  const appAndDs = data?.appAndDs;
+  const dsDetail = data?.dsDetail;
+  const fieldsDs = data?.fieldsDs;
+  const items = data?.items;
   const { state } = useTransition();
   const loading = state === 'loading';
   const submit = state === 'submitting';
-  const nameWsUpdateRef = React.useRef<HTMLInputElement>(null);
 
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
   const [confirm, setConfirm] = useState<boolean>(false);
-  const [openUpdateModalDs, setOpenUpdateModalDs] = useState<boolean>(false);
-  const [confirmDs, setConfirmDs] = useState<boolean>(false);
-  const [dsDetail, setDsDetail] = useState<Datastores | undefined>();
+  const [dsSelect, setDsSelect] = React.useState<any>();
+  const [fields, setFields] = useState<any>();
+
+  React.useEffect(() => {
+    getFieldsDs();
+  }, []);
 
   const setHiddenCreate = (childData: boolean) => {
     setOpenNewModal(childData);
@@ -249,30 +263,6 @@ export default function ItemDetailsPage() {
     setConfirm(childData);
   }
 
-  const setHiddenUpdateDatastore = (childData: boolean) => {
-    setOpenUpdateModalDs(childData);
-  }
-
-  const setHiddenConfirmDatastore = (childData: boolean) => {
-    setConfirmDs(childData);
-  }
-
-  const handleClickUpdateDs = (dsDetail?: Datastores) => {
-    setOpenUpdateModalDs(!openUpdateModalDs);
-    setDsDetail(dsDetail);
-  }
-
-  const handleClickDeleteDs = (dsDetail?: Datastores) => {
-    setConfirmDs(!confirmDs);
-    setDsDetail(dsDetail);
-  }
-
-  React.useEffect(() => {
-    if (actionData?.errors?.name) {
-      nameWsUpdateRef?.current?.focus();
-    }
-  }, [actionData]);
-
   React.useEffect(() => {
     if (actionData?.errors === undefined) {
       setOpenNewModal(false);
@@ -283,28 +273,92 @@ export default function ItemDetailsPage() {
     if (actionData?.errors === undefined) {
       setConfirm(false);
     }
-    if (actionData?.errors === undefined) {
-      setOpenUpdateModalDs(false);
-    }
-    if (actionData?.errors === undefined) {
-      setConfirmDs(false);
-    }
   }, [data]);
+
+  const convertDs = () => {
+    const result: any = [];
+    datastores?.datastores?.map(ds => {
+      result.push({ value: ds?.d_id, label: ds?.name });
+    });
+    return result;
+  };
+
+  const handleChange = (value: any) => {
+    setDsSelect(value);
+    navigate(`/workspace/${data?.workspaceId}/project/${data?.projectId}/datastore/${value?.value}`, { replace: true });
+    window.location.reload();
+  };
+
+  const convertDsDetail = () => {
+    let result: any = {};
+
+    if (datastores && datastores?.datastores) {
+      result = { value: dsDetail?.datastoreSetting?.id, label: dsDetail?.datastoreSetting?.names?.en };
+    }
+    return result;
+  };
+
+  const getFieldsDs = async () => {
+    const itemFields: any = [];
+    const idArray = Object.keys(fieldsDs?.dsFields?.fields);
+
+    idArray.map((item) => {
+      itemFields.push({
+        title: fieldsDs?.dsFields?.fields[item]?.name,
+        data_type: fieldsDs?.dsFields?.fields[item]?.dataType,
+        field_id: fieldsDs?.dsFields?.fields[item]?.field_id,
+        display_id: fieldsDs?.dsFields?.fields[item]?.display_id,
+      })
+    });
+    setFields(itemFields);
+  };
 
   return (
     <>
-      <div className=' flex justify-between'>
-        <h3 className='text-2xl font-bold'>{projectDetail?.project?.name}</h3>
-        {/* <div>
-          <ButtonNew onClick={() => { setOpenNewModal(!openNewModal), setOpenUpdateModal(false), setConfirm(false) }} text={'New'} />
-          <ButtonUpdate onClick={() => { setOpenUpdateModal(!openUpdateModal), setOpenNewModal(false), setConfirm(false) }} text={'Update'} className='mx-4' />
-          <ButtonDelete onClick={() => { setConfirm(!confirm), setOpenUpdateModal(false), setOpenNewModal(false) }} text={'Delete'} />
-        </div> */}
+      <div className='flex justify-start'>
+        <h3 className='text-2xl font-bold'>Datastore Select:</h3>
+        <div className="min-w-min ml-4">
+          <Select
+            loading={loading}
+            value={dsSelect ?? convertDsDetail()}
+            onChange={(e) => handleChange(e)}
+            options={convertDs()}
+            isSearchable={true}
+            searchInputPlaceholder={'Input datastore name'}
+          />
+        </div>
       </div>
       <hr className='my-4' />
-      <div>
-        Item detail
-      </div>
+      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
+          <tr>
+            {
+              fields && fields?.length > 0 && fields.map((field: any) => (
+                <th scope="col" className="py-2 px-4" key={field?.field_id}>{field?.title}</th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            items && items?.dsItems && items?.dsItems?.items?.length > 0 ? items?.dsItems?.items?.map((item: any) => (
+              <tr key={item?.i_id} className='bg-white hover:bg-gray-100 border-b'>
+                {
+                  fields && fields?.length > 0 && fields.map((field: any) => (
+                    <td key={field?.field_id} className="text-xs text-gray-70 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">{field?.data_type === 'file' && 
+                    Object.keys(item)?.map(i => (i === field?.field_id))
+                    ? item[field?.field_id]?.split(',').length : item[field?.field_id]}
+                    </td>
+                  ))
+                }
+              </tr>
+            ))
+              : <tr>
+                <td className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">Not Record</td>
+              </tr>
+          }
+        </tbody>
+      </table>
 
       {loading && <Loading />}
       {submit && <Loading />}
@@ -312,25 +366,19 @@ export default function ItemDetailsPage() {
       {openNewModal && <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} />}
       {openUpdateModal && <UpdateProject actionData={actionData} setHiddenModal={setHiddenUpdate} />}
       {confirm && <ModalConfirmDelete actionData={actionData} setHiddenConfirm={setHiddenConfirm} />}
-
-      {openUpdateModalDs && <ModalUpdateDatastore dsDetail={dsDetail} actionData={actionData} setHiddenModal={setHiddenUpdateDatastore} />}
-      {confirmDs && <ModalConfirmDeleteDs dsDetail={dsDetail} actionData={actionData} setHiddenConfirm={setHiddenConfirmDatastore} />}
     </>
   );
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
-
   return <div>An unexpected error occurred: {error?.message}</div>;
 }
 
 export function CatchBoundary() {
   const caught = useCatch();
-
   if (caught.status === 404) {
     return <div>Not found</div>;
   }
-
   throw new Error(`Unexpected caught response with status: ${caught?.status}`);
 }

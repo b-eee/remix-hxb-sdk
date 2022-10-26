@@ -7,19 +7,6 @@ import { baseUrl } from "~/constant/url";
 import { UserInfo } from "~/respone/user";
 import { UserInfoRes } from "@hexabase/hexabase-js/dist/lib/types/user";
 
-// export async function getUserBySession(request: Request): Promise<UserInfo> {
-//   const session = await getSession(request);
-//   const user = session.get(USER_SESSION_KEY);
-//   return user;
-// }
-
-// export async function getUser(request: Request): Promise<any> {
-//   const user = await getUserBySession(request);
-//   if (user === undefined) return;
-//   if (user) return user;
-//   throw await logout(request);
-// }
-
 export async function getUser(request: Request): Promise<UserInfoRes | undefined> {
   const session = await getSession(request);
   const token = session.get(USER_TOKEN);

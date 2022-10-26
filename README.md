@@ -3,6 +3,10 @@
 
 - Start dev server:
   ```sh
+  cp .env.example .env
+
+  config base_url
+
   npm install && npm run dev
   or
   yarn && yarn dev

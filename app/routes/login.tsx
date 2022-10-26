@@ -62,14 +62,9 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const user = await hexabase.auth.login({ email, password });
+  const { token, error } = await hexabase.auth.login({ email, password });
 
-  if (user && user?.token) {
-    const { userInfo } = await hexabase.users.get(user?.token);
-    userInfoRes = userInfo;
-  }
-
-  if (!user || user?.error) {
+  if (error) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 }
@@ -78,7 +73,7 @@ export async function action({ request }: ActionArgs) {
 
   return createUserSession({
     request,
-    token: user?.token,
+    token: token,
     remember: remember === "on" ? true : false,
     redirectTo,
   });
@@ -198,7 +193,7 @@ export default function LoginPage() {
           </div>
         </Form>
       </div>
-      
+
       {loading && <Loading />}
       {submit && <Loading />}
     </div>

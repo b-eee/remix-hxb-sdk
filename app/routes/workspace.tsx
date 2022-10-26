@@ -198,7 +198,7 @@ export default function Workspace() {
 
       <footer className="md:flex md:items-center md:justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900">
         <span className="text-sm text-gray-800 sm:text-center dark:text-gray-400">
-          © {new Date().getFullYear()} <a href="https://en.hexabase.com/our-company/" className="hover:underline">Hexabase すごい</a>
+          © {new Date().getFullYear()} <a href="https://en.hexabase.com/our-company/" target={"_blank"} className="hover:underline">Hexabase すごい</a>
         </span>
       </footer>
 

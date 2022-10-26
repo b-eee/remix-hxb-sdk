@@ -228,7 +228,6 @@ export default function ProjectDetailsPage() {
   const { state } = useTransition();
   const loading = state === 'loading';
   const submit = state === 'submitting';
-  const nameWsUpdateRef = React.useRef<HTMLInputElement>(null);
 
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
@@ -266,12 +265,6 @@ export default function ProjectDetailsPage() {
     setConfirmDs(!confirmDs);
     setDsDetail(dsDetail);
   }
-
-  React.useEffect(() => {
-    if (actionData?.errors?.name) {
-      nameWsUpdateRef?.current?.focus();
-    }
-  }, [actionData]);
 
   React.useEffect(() => {
     if (actionData?.errors === undefined) {
