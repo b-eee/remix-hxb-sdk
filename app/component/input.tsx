@@ -2,7 +2,6 @@ interface Props {
   id?: string;
   name?: string;
   refs?: React.LegacyRef<HTMLInputElement>;
-  defaultValue?: string | number | readonly string[];
   value?: string | number | readonly string[];
   ariaInvalid?: boolean | "false" | "true" | "grammar" | "spelling";
   readOnly?: boolean;
@@ -11,23 +10,23 @@ interface Props {
   className?: string;
 }
 
-export const Input = ({ id, name, refs, ariaInvalid, defaultValue, placeholder, autoFocus, readOnly, className }: Props) => {
+export const Input = ({ id, name, refs, ariaInvalid, value, placeholder, autoFocus, readOnly, className }: Props) => {
   return (
     <div>
       {
         readOnly ? <>
           <input
             readOnly={readOnly}
-            value={defaultValue ?? undefined}
+            value={value ?? undefined}
             type='text'
             name={name}
             id={id}
-            className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-auto p-2.5 dark:placeholder-gray-400 dark:text-white' />
+            className={`${className} bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 dark:placeholder-gray-400 dark:text-white`} />
         </>
           : <>
             <input
               readOnly={readOnly}
-              defaultValue={defaultValue ?? undefined}
+              defaultValue={value ?? undefined}
               autoFocus={autoFocus}
               ref={refs}
               type="text"

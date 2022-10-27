@@ -1160,10 +1160,10 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
-"@hexabase/hexabase-js@^1.0.17":
-  version "1.0.17"
-  resolved "https://registry.npmjs.org/@hexabase/hexabase-js/-/hexabase-js-1.0.17.tgz"
-  integrity sha512-OLfSAzPSyNQrMfAO1VAayib79PdCVgEJNTO5MIXzfIo5O4AOgbiFPSwhhfLLV3Fj/3uQsw+xFSbtP8vQzIyiWA==
+"@hexabase/hexabase-js@^1.0.18":
+  version "1.0.18"
+  resolved "https://registry.yarnpkg.com/@hexabase/hexabase-js/-/hexabase-js-1.0.18.tgz#36f292dab7913f9d5ef45ea407b6f539808c47cb"
+  integrity sha512-UeaPOxfKW5wJ9RhFMiqdCWlUzUNm4I2eI96V7loL2ZyAFVQvf9e3ZXjN/CuDPDHlyQUxH4Va0fdZ/7FJBEf6Dw==
   dependencies:
     dotenv "^16.0.0"
     graphql-request "^4.2.0"

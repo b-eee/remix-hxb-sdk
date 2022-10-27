@@ -43,10 +43,10 @@ export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsD
               <p className='text-sm font-medium text-gray-900 dark:text-gray-300 pb-2'>Please input the following to confirm deletion: {dsDetail?.name}</p>
               <Form method='post' className='space-y-6'>
                 <div>
-                  <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Datastore name</label>
                   <input type={'hidden'} name={'deleteDs'} value={'deleteDs'} />
                   <input type={'hidden'} name={'nameDsDetail'} value={dsDetail?.name} />
                   <input type={'hidden'} name={'idDsDetail'} value={dsDetail?.d_id} />
+                  <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Datastore name</label>
                   <Input
                   readOnly={false}
                     autoFocus={true}

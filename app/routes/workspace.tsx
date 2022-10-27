@@ -128,6 +128,7 @@ export default function Workspace() {
     } else {
       setOpenModalCreateWs(false);
       navigate(`${value?.value}-sl`, { replace: true });
+      window.location.reload();
     }
     setWsSelect(value);
   };
