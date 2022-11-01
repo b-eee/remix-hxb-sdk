@@ -7,6 +7,7 @@ import {
   DatastoreRes,
   DatastoreSettingRes,
   DatastoreUpdateSetting,
+  DsActionRes,
   ExistsDSDisplayIDExcludeOwnRes,
   IsExistsDSDisplayIDExcludeOwnReq
 } from "@hexabase/hexabase-js/dist/lib/types/datastore";
@@ -87,6 +88,17 @@ export async function getFields(request: Request, datastoreId: string, projectId
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.datastores.getFields(datastoreId, projectId);
+  } else {
+    return undefined;
+  }
+}
+
+export async function getActions(request: Request, datastoreId: string): Promise<DsActionRes | undefined> {
+  const session = await getSession(request);
+  const token = session.get(USER_TOKEN);
+  if (token) {
+    const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
+    return await hexabase.datastores.getActions(datastoreId);
   } else {
     return undefined;
   }

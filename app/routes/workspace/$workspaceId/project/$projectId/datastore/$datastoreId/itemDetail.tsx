@@ -11,8 +11,8 @@ interface Props {
 }
 
 export const DrawerItemDetail = ({ onClick, isOpen, actions, fieldValue, titleItemDetail, idItem }: Props) => {
-	console.log('actions', actions);
-	console.log('fieldValue', fieldValue);
+	// console.log('actions', actions);
+	// console.log('fieldValue', fieldValue);
 
 	return (
 		<>

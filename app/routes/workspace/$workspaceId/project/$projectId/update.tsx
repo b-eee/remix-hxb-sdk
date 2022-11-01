@@ -87,7 +87,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 									)}
 								</div>
 
-								<div>
+								{/* <div>
 									<label htmlFor='nameProjectJpUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project JA name <span className='text-red-600'>*</span></label>
 									<input
 										autoFocus={true}
@@ -106,7 +106,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 											{actionData?.errors?.name}
 										</div>
 									)}
-								</div>
+								</div> */}
 
 								<div>
 									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project JA name <span className='text-red-600'>*</span></label>

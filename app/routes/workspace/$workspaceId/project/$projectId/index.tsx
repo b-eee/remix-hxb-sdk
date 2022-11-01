@@ -57,9 +57,7 @@ export async function action({ request, params }: ActionArgs) {
   }
 
   const nameProjectEnCreate = formData.get('nameProjectEnCreate');
-  const nameProjectJpCreate = formData.get('nameProjectJpCreate');
   const nameProjectEnUpdate = formData.get('nameProjectEnUpdate');
-  const nameProjectJpUpdate = formData.get('nameProjectJpUpdate');
   const displayIdProject = formData.get('displayIdProject');
   const namePrjDelete = formData.get('namePrjDelete');
 
@@ -87,13 +85,8 @@ export async function action({ request, params }: ActionArgs) {
         { errors: { title: 'nameProjectEnCreate', name: 'Field is required' } },
         { status: 400 }
       );
-    } else if (typeof nameProjectJpCreate !== 'string' || nameProjectJpCreate?.length === 0) {
-      return json(
-        { errors: { title: 'nameProjectJpCreate', name: 'Field is required' } },
-        { status: 400 }
-      );
     }
-    const newProject = await createProject(request, { name: { en: nameProjectEnCreate, ja: nameProjectJpCreate } });
+    const newProject = await createProject(request, { name: { en: nameProjectEnCreate, ja: nameProjectEnCreate } });
     if (newProject?.error) {
       return json(
         { errors: { title: null, name: 'Data invalid' } },
@@ -109,18 +102,13 @@ export async function action({ request, params }: ActionArgs) {
         { errors: { title: 'nameProjectEnUpdate', name: 'Field is required' } },
         { status: 400 }
       );
-    } else if (typeof nameProjectJpUpdate !== 'string' || nameProjectJpUpdate?.length === 0) {
-      return json(
-        { errors: { title: 'nameProjectJpUpdate', name: 'Field is required' } },
-        { status: 400 }
-      );
     } else if (typeof displayIdProject !== 'string' || displayIdProject?.length === 0) {
       return json(
         { errors: { title: 'displayIdProject', name: 'Field is required' } },
         { status: 400 }
       );
     }
-    const updateProjectCurr = await updateProjectName(request, { payload: { project_name: { en: nameProjectEnUpdate, ja: nameProjectJpUpdate }, project_id: params?.projectId, project_displayid: displayIdProject } });
+    const updateProjectCurr = await updateProjectName(request, { payload: { project_name: { en: nameProjectEnUpdate, ja: nameProjectEnUpdate }, project_id: params?.projectId, project_displayid: displayIdProject } });
     if (updateProjectCurr?.error) {
       return json(
         { errors: { title: 'Data invalid', name: 'Data invalid' } },
