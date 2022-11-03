@@ -1,7 +1,7 @@
 import { ItemActionParameters, ItemHistory } from "@hexabase/hexabase-js/dist/lib/types/item";
-import { ActionArgs, LoaderArgs, redirect, unstable_createFileUploadHandler, unstable_parseMultipartFormData } from "@remix-run/node";
+import { ActionArgs, LoaderArgs, redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useActionData, useLoaderData, useParams, useTransition } from "@remix-run/react";
+import { Form, useActionData, useLoaderData, useTransition } from "@remix-run/react";
 import React, { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 
@@ -12,9 +12,10 @@ import { Input } from "~/component/input";
 import { Loading } from "~/component/Loading";
 import { getActions, getFields } from "~/service/datastore/datastore.server";
 import { deleteItem, getItemDetail, getItems, updateItem } from "~/service/item/item.server";
-import { getDownloadFile } from "~/service/storage/storage.server";
+import { createFile, deleteFile, getDownloadFile } from "~/service/storage/storage.server";
 import SelectFileIcon from "../../../../../../../../../../public/assets/selectFile.svg";
 import Delete from "../../../../../../../../../../public/assets/delete.svg";
+import { toBase64 } from "~/service/helper";
 
 export async function loader({ request, params }: LoaderArgs) {
 	invariant(params?.projectId, 'projectId not found');
@@ -41,9 +42,10 @@ export async function loader({ request, params }: LoaderArgs) {
 		include_linked_items: true,
 	};
 	let itemDetail;
-	if (itemId)
+	if (itemId) {
 		itemDetail = await getItemDetail(request, datastoreId, itemId, projectId, itemDetailParams);
-	if (!itemDetail || !itemDetail?.itemDetails) {
+	}
+	if (!itemDetail || itemDetail?.error) {
 		throw new Response('Not Found', { status: 404 });
 	}
 	return json({ projectId, datastoreId, fieldsDs, items, itemDetail, itemId });
@@ -72,17 +74,15 @@ export async function action({ request, params }: ActionArgs) {
 	const nameAction = formData.get('nameAction');
 	const typeUpdate = formData.get('actionUpdate');
 	const contentType = formData.get('contentType');
-	const fileUpload = formData.get('fileUpload');
-
-	console.log('fileUpload', fileUpload);
+	const actionDeleteFile = formData.get('deleteFile');
+	const fileIdDelete = formData.get('fileIdDelete');
 
 	const actionUpdate = actions?.dsActions?.find(v => v?.name?.toLocaleLowerCase() === 'update')?.action_id;
 	const actionDelete = actions?.dsActions?.find(v => v?.name?.toLocaleLowerCase() === 'delete')?.action_id;
-	const fieldIds = Object.keys(fieldsDs?.dsFields?.fields);
+	// const fieldIds = Object.keys(fieldsDs?.dsFields?.fields);
 	const fieldValues: any = Object.values(fieldsDs?.dsFields?.fields);
-	const fieldLayouts = Object.values(fieldsDs?.dsFields?.fields);
+	const fieldLayouts = Object.values(fieldsDs?.dsFields?.field_layout);
 	const fieldValueItemDetails: any = Object.values(itemDetail?.itemDetails?.field_values);
-
 	const changes: any = [];
 	const history: ItemHistory = {
 		action_id: actionUpdate,
@@ -97,50 +97,81 @@ export async function action({ request, params }: ActionArgs) {
 		rev_no: itemDetail?.itemDetails?.rev_no,
 	};
 
-	if (fileId && typeof fileId === 'string' && fileId?.length > 0) {
-		const res = await getDownloadFile(request, fileId);
-		if (res?.error) {
-			console.log(res?.error);
-			return json(
-				{ resp: { data: 'DownloadFileError', errors: { title: 'InvalidValue', err: `${res?.error}` } } },
-				{ status: 400 }
-			);
-		}
+	let defaultChangeIfNothingChange;
 
-		if (res?.file?.data) {
-			return json(
-				{ resp: { errors: null, data: { file: res?.file, contentType } } },
-				{ status: 200 }
-			);
-		}
-	}
-
-	if (typeUpdate === 'update' && fieldIds && fieldIds?.length > 0) {
+	if (typeUpdate === 'update' && fieldValues && fieldValues?.length > 0) {
 		for (const fieldValue of fieldValues) {
-			if (fieldValue?.dataType !== 'file') {
-				const fieldValueInput = formData.get(fieldValue?.display_id);
-				const fieldLayout: any = fieldLayouts?.find((v: any) => fieldValue?.field_id === v?.field_id);
-				const fieldValueItemDetail = fieldValueItemDetails?.find((v: any) => fieldValue?.display_id === v?.field_id);
-				if (fieldValueItemDetail?.value !== fieldValueInput) {
-					const change = {
-						as_title: fieldValue?.as_title,
-						cols: fieldLayout?.col,
-						dataType: fieldValue?.dataType,
-						id: fieldValue?.field_id,
-						idx: fieldValue?.fieldIndex,
-						rowHeight: "item?.rowHeight",
-						rows: fieldLayout?.row,
-						status: false,
-						tabindex: (fieldLayout?.row + 1) * 10 + fieldLayout?.col,
-						title: fieldValue?.name,
-						unique: fieldValue?.unique,
-						value: fieldValueInput,
-						x: fieldLayout?.sizeX,
-						y: fieldLayout?.sizeY,
-					}
-					changes.push(change);
+			const fieldValueForm: any = formData.get(fieldValue?.display_id);
+			const fieldLayout: any = fieldLayouts?.find((v: any) => fieldValue?.field_id === v?.field_id);
+			const fieldValueItemDetail = fieldValueItemDetails?.find((v: any) => fieldValue?.display_id === v?.field_id);
+			let change;
+
+			if (fieldValue?.dataType !== 'file' && fieldValue?.dataType !== 'status' && fieldValueItemDetail?.value?.trim() !== fieldValueForm?.trim()) {
+				change = {
+					as_title: fieldValue?.as_title,
+					cols: fieldLayout?.col,
+					dataType: fieldValue?.dataType,
+					id: fieldValue?.field_id,
+					idx: fieldValue?.fieldIndex,
+					rowHeight: "item.rowHeight",
+					rows: fieldLayout?.row,
+					status: false,
+					tabindex: (fieldLayout?.row + 1) * 10 + fieldLayout?.col,
+					title: itemDetail?.itemDetails?.title,
+					unique: fieldValue?.unique,
+					value: fieldValueForm,
+					x: fieldLayout?.sizeX,
+					y: fieldLayout?.sizeY,
 				}
+				changes.push(change);
 			}
+			if (fieldValue?.as_title) {
+				defaultChangeIfNothingChange = change;
+			}
+
+			if (fieldValue?.dataType === 'file' && fieldValueForm) {
+				const file: any = JSON.parse(fieldValueForm);
+				const payload = {
+					filename: file?.name,
+					contentTypeFile: file?.type,
+					filepath: `${params?.datastoreId}/${params?.itemId}/${fieldValue?.field_id}/${file?.name}`,
+					content: file?.content,
+					d_id: params?.datastoreId,
+					p_id: params?.projectId,
+					field_id: fieldValue?.field_id,
+					item_id: params?.itemId,
+					display_order: 0,
+				}
+				const result = await createFile(request, payload);
+				if (result?.error) {
+					return json(
+						{ resp: { data: null, errors: { title: 'InvalidValue', err: `${result?.error}` } } },
+						{ status: 400 }
+					);
+				}
+				const change = {
+					as_title: fieldValue?.as_title,
+					cols: fieldLayout?.col,
+					dataType: fieldValue?.dataType,
+					id: fieldValue?.field_id,
+					idx: fieldValue?.fieldIndex,
+					rowHeight: "item.rowHeight",
+					rows: fieldLayout?.row,
+					status: false,
+					tabindex: (fieldLayout?.row + 1) * 10 + fieldLayout?.col,
+					title: itemDetail?.itemDetails?.title,
+					unique: fieldValue?.unique,
+					x: fieldLayout?.sizeX,
+					y: fieldLayout?.sizeY,
+					post_file_ids: [...fieldValueItemDetail?.value?.map((v: any) => v?.file_id) ?? [], result?.data?.file_id],
+					value: [...fieldValueItemDetail?.value?.map((v: any) => v?.file_id) ?? [], result?.data?.file_id],
+				}
+				changes.push(change);
+			}
+		}
+
+		if (changes?.length == 0) {
+			changes.push(defaultChangeIfNothingChange);
 		}
 
 		const result = await updateItem(request, params?.projectId, params?.datastoreId, params?.itemId, itemActionParameters);
@@ -163,11 +194,99 @@ export async function action({ request, params }: ActionArgs) {
 		return redirect(`workspace/${params?.workspaceId}/project/${params?.projectId}/datastore/${params?.datastoreId}`);
 	}
 
-	return redirect(`workspace/${params?.workspaceId}/project/${params?.projectId}/datastore/${params?.datastoreId}/item/${params?.itemId}`);
+	if (actionDeleteFile === 'deleteFile' && typeof fileIdDelete === 'string' && fileIdDelete?.length > 0) {
+		const resDeleteFile = await deleteFile(request, fileIdDelete);
+		if (resDeleteFile?.error) {
+			return json(
+				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${resDeleteFile?.error}` } } },
+				{ status: 400 }
+			);
+		}
+
+		for (const fieldValue of fieldValues) {
+			const fieldValueForm: any = formData.get(fieldValue?.display_id);
+			const fieldLayout: any = fieldLayouts?.find((v: any) => fieldValue?.field_id === v?.field_id);
+			const fieldValueItemDetail = fieldValueItemDetails?.find((v: any) => fieldValue?.display_id === v?.field_id);
+			const change = {
+				as_title: fieldValue?.as_title,
+				cols: fieldLayout?.col,
+				dataType: fieldValue?.dataType,
+				id: fieldValue?.field_id,
+				idx: fieldValue?.fieldIndex,
+				rowHeight: "item.rowHeight",
+				rows: fieldLayout?.row,
+				status: false,
+				tabindex: (fieldLayout?.row + 1) * 10 + fieldLayout?.col,
+				title: itemDetail?.itemDetails?.title,
+				unique: fieldValue?.unique,
+				value: fieldValueForm,
+				x: fieldLayout?.sizeX,
+				y: fieldLayout?.sizeY,
+			}
+			if (fieldValue?.as_title) {
+				defaultChangeIfNothingChange = change;
+			}
+
+			if (fieldValue?.dataType === 'file' && fieldValueForm) {
+				if (fieldValueItemDetail && fieldValueItemDetail?.value && fieldValueItemDetail?.value?.length > 0) {
+					fieldValueItemDetail?.value?.map((v:any, idx: number) => {
+						if(v?.file_id === fileIdDelete) {
+							fieldValueItemDetail?.value?.splice(idx, 1); 
+						}
+					});
+				}
+				const change = {
+					as_title: fieldValue?.as_title,
+					cols: fieldLayout?.col,
+					dataType: fieldValue?.dataType,
+					id: fieldValue?.field_id,
+					idx: fieldValue?.fieldIndex,
+					rowHeight: "item.rowHeight",
+					rows: fieldLayout?.row,
+					status: false,
+					tabindex: (fieldLayout?.row + 1) * 10 + fieldLayout?.col,
+					title: itemDetail?.itemDetails?.title,
+					unique: fieldValue?.unique,
+					x: fieldLayout?.sizeX,
+					y: fieldLayout?.sizeY,
+					post_file_ids: [...fieldValueItemDetail?.value?.map((v: any) => v?.file_id) ?? []],
+					value: [...fieldValueItemDetail?.value?.map((v: any) => v?.file_id) ?? []],
+				}
+				changes.push(change);
+			}
+		}
+
+		const res = await updateItem(request, params?.projectId, params?.datastoreId, params?.itemId, itemActionParameters);
+		if (res?.error) {
+			return json(
+				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${res?.error}` } } },
+				{ status: 400 }
+			);
+		}
+	}
+
+	if (fileId && typeof fileId === 'string' && fileId?.length > 0) {
+		const res = await getDownloadFile(request, fileId);
+		if (res?.error) {
+			console.log(res?.error);
+			return json(
+				{ resp: { data: 'DownloadFileError', errors: { title: 'InvalidValue', err: `${res?.error}` } } },
+				{ status: 400 }
+			);
+		}
+
+		if (res?.file?.data) {
+			return json(
+				{ resp: { errors: null, data: { file: res?.file, contentType } } },
+				{ status: 200 }
+			);
+		}
+	}
+
+	return redirect(`/workspace/${params?.workspaceId}/project/${params?.projectId}/datastore/${params?.datastoreId}/item/${params?.itemId}`);
 }
 
 export default function DrawerDetailItem() {
-	const params = useParams();
 	const data = useLoaderData<typeof loader>();
 	const actionData = useActionData<typeof action>();
 	const itemDetail = data?.itemDetail;
@@ -175,30 +294,35 @@ export default function DrawerDetailItem() {
 	const { state } = useTransition();
 	const loading = state === 'loading';
 	const submit = state === 'submitting';
+	const idle = state === 'idle';
 
 	const [itemActions, setActions] = useState<any>();
 	const [fieldValue, setFieldValue] = useState<any>();
+	const [fieldValueAsTitle, setFieldValueAsTitle] = useState<any>([]);
 	const [fieldValueStatus, setFieldValueStatus] = useState<any>([]);
 	const [files, setFiles] = useState<any>([]);
 	const [deleteItem, setDelete] = useState<any>();
 	const [update, setUpdate] = useState<any>();
-	// const [create, setCreate] = useState<any>();
+	const [create, setCreate] = useState<any>();
 	const [copy, setCopy] = useState<any>();
 	const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
 	const [inputOpen, setInputOpen] = useState<boolean>(true);
-	const [dataImage, setDataImage] = useState<any>();
+	const [dataImageDownload, setDataImageDownload] = useState<any>();
+	const [base64UploadFiles, setBase64UploadFiles] = useState<any>('');
 
 	useEffect(() => {
 		setActions(Object.values(itemDetail?.itemDetails?.item_actions));
 		const fieldVal = Object.values(itemDetail?.itemDetails?.field_values);
 		fieldVal && fieldVal?.length > 0 && setFiles(fieldVal?.filter((v: any) => (v?.dataType === 'file')));
 		fieldVal && fieldVal?.length > 0 && setFieldValueStatus(fieldVal?.filter((v: any) => (v?.dataType === 'status')));
+		fieldVal && fieldVal?.length > 0 && setFieldValueAsTitle(fieldVal?.filter((v: any) => (v?.field_id === 'Title')));
 		setFieldValue(fieldVal);
 	}, []);
+	// console.log('fieldValueAsTitle',fieldValueAsTitle);
 
 	useEffect(() => {
 		itemActions && itemActions?.length > 0 && itemActions?.map((v: any) => {
-			// if (v?.action_name?.toLocaleLowerCase() === 'new') setCreate(v);
+			if (v?.action_name?.toLocaleLowerCase() === 'new') setCreate(v);
 			if (v?.action_name?.toLocaleLowerCase() === 'update') setUpdate(v);
 			if (v?.action_name?.toLocaleLowerCase() === 'delete') setDelete(v);
 			if (v?.action_name?.toLocaleLowerCase() === 'copy') setCopy(v);
@@ -206,26 +330,41 @@ export default function DrawerDetailItem() {
 	}, [itemActions]);
 
 	useEffect(() => {
-		if (actionData?.resp?.data?.file?.data) {
-			setDataImage(actionData?.resp?.data);
+		const data: any = actionData?.resp?.data;
+		if (data?.file?.data) {
+			setDataImageDownload(actionData?.resp?.data);
 		}
 	}, [actionData]);
 
 	useEffect(() => {
-		if (dataImage) {
-			const data = dataImage?.file?.data;
-			const filename = dataImage?.file?.filename;
-			const contentType = dataImage?.contentType;
-			let a = document.createElement("a");
-			a.href = `data:${contentType};base64,${data}`;
+		if (dataImageDownload) {
+			const data = dataImageDownload?.file?.data;
+			const realData = data.split('base64');
+			const filename = dataImageDownload?.file?.filename;
+			const contentType = dataImageDownload?.contentType;
+			// console.log('data', data);
+			// console.log('realData', realData);
+			// console.log('filename', filename);
+			// console.log('contentType', contentType);
+			// console.log('href', `data:${contentType};base64,/${realData[1] ?? data}`);
+			let a = document.body.appendChild(document.createElement("a"));
+			a.href = `data:${contentType};base64,${realData[1] ?? data}`;
 			a.download = filename;
 			a.click();
 			a.remove();
 		}
-	}, [dataImage]);
+	}, [dataImageDownload]);
+
+	useEffect(() => {
+		formUploadFileRef?.current?.submit();
+	}, [base64UploadFiles])
 
 	// console.log('data', data);
 	// console.log('fieldValue', fieldValue);
+
+	const handleChangeFile = async (file: any) => {
+		setBase64UploadFiles({ type: file?.type, name: file?.name, content: await toBase64(file) });
+	}
 
 	return (
 		<>
@@ -237,10 +376,11 @@ export default function DrawerDetailItem() {
 				<hr className="m-0" />
 				<div className="flex h-auto w-full items-start">
 					<div className="w-3/4 border-r-2 h-full pr-4">
-						<Form method="post" encType="multipart/form-data" action="">
+						<Form method="post" encType="multipart/form-data">
 							<input type="hidden" name="actionUpdate" value={'update'} />
+							{/* field input */}
 							{
-								fieldValue && fieldValue?.length > 0 && fieldValue?.map((v: any) => ( v?.dataType !== 'file' && v?.dataType !== 'status' &&
+								fieldValue && fieldValue?.length > 0 && fieldValue?.map((v: any) => (v?.dataType !== 'file' && v?.dataType !== 'status' &&
 									<div key={v?.field_id}>
 										<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-300 my-2">{v?.field_name}</label>
 										<Input
@@ -255,39 +395,72 @@ export default function DrawerDetailItem() {
 									</div>
 								))
 							}
+							{/* field file */}
 							{
 								files && files?.length > 0 && files?.map((v: any) => (
-									<div key={v?.field_id}>
+									<div key={v?.field_id} className={v?.field_id}>
 										<div className="flex justify-between items-center">
-											<label htmlFor={''} className="block text-sm font-medium text-gray-900 dark:text-gray-300 my-2">{v?.field_name}</label>
+											<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-300 my-2">{v?.field_name}</label>
 											{!inputOpen
-												? <Form method="post" encType="multipart/form-data" ref={formUploadFileRef} action={`/workspace/${params?.workspaceId}/project/${params?.projectId}/datastore/${params?.datastoreId}/item/${params?.itemId}`}>
+												? <>
+													<Form method="post" ref={formUploadFileRef} onSubmit={(e) => e?.preventDefault}>
+														{
+															fieldValueAsTitle && fieldValueAsTitle?.length > 0 && fieldValueAsTitle?.map((asTT: any) => (
+																<input type="hidden" name={asTT?.field_id} value={asTT?.value} />
+															))
+														}
+														<input type="hidden" name="actionUpdate" value={'update'} />
+														<input type="hidden" id={v?.field_id} name={v?.field_id} value={JSON.stringify(base64UploadFiles)} />
+													</Form>
 													<div className="flex items-center justify-between">
 														<div className="w-5 h-5"><img src={SelectFileIcon} alt="file" width={'100%'} height={'100%'} /></div>
-														<label htmlFor="fileUpload" className="cursor-pointer underline decoration-gray-700 hover:no-underline">Select file...</label>
-														<input type="file" name="fileUpload" id="fileUpload" className="hidden" onChange={() => formUploadFileRef?.current?.submit()}/>
+														{/* <label htmlFor="fileUpload" className="cursor-pointer underline decoration-gray-700 hover:no-underline">Select file...</label> */}
+														<input
+															// multiple
+															type="file"
+															name={v?.field_id}
+															id={v?.field_id}
+															className="block w-full text-xs text-gray-500 file:cursor-pointer file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+															onChange={(e: any) => handleChangeFile(e?.target?.files[0])}
+														/>
 													</div>
-												</Form> : ''
+												</> : ''
 											}
 										</div>
 										<div className="overflow-y-scroll overflow-x-hidden bg-gray-200 border-2 scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded" style={{ maxHeight: 50 }}>
 											{
 												v?.value && v?.value?.length > 0
 													? v?.value?.map((file: any) => (
-														<Form method="post" key={file?.file_id} >
-															<input type={'hidden'} name="fileId" value={file?.file_id} />
-															<input type={'hidden'} name="contentType" value={file?.contentType} />
-															<div className="flex items-center justify-start">
-																<div className="w-5 h-5"><img src={SelectFileIcon} alt="file" width={'100%'} height={'100%'} /></div>
-																<button className={`${inputOpen ? 'text-blue-500' : ''} underline decoration-1 cursor-pointer w-auto h-auto text-sm rounded py-2`}>{file?.filename}</button>
-																<div className="px-2"></div>
-																{!inputOpen ? <Form method="post" className="flex items-center">
-																	<input type="hidden" name="fileIdDelete" value={file?.file_id} />
-																	<input type="hidden" name="deleteFile" value={'deleteFile'} />
-																	<button><div className="w-5 h-5 cursor-pointer"><img src={Delete} alt="file" width={'100%'} height={'100%'} /></div></button>
-																</Form> : ''}
-															</div>
-														</Form>
+														<div key={file?.file_id}>
+															{
+																inputOpen
+																	? <Form method="post">
+																		<input type={'hidden'} name="fileId" value={file?.file_id} />
+																		<input type={'hidden'} name="contentType" value={file?.contentType} />
+																		<div className="flex items-center justify-start">
+																			<div className="w-5 h-5"><img src={SelectFileIcon} alt="file" width={'100%'} height={'100%'} /></div>
+																			<button className={`text-blue-500 underline decoration-1 cursor-pointer w-auto h-auto text-sm rounded py-2`}>{file?.filename}</button>
+																		</div>
+																	</Form>
+																	:
+																	<div className="flex items-center justify-start">
+																		<div className="w-6 h-w-6"><img src={SelectFileIcon} alt="file" width={'100%'} height={'100%'} /></div>
+																		<div className={` w-auto h-auto text-sm rounded py-2`}>{file?.filename}</div>
+																		<div className="px-2"></div>
+																		{!inputOpen ? <Form method="post" className="flex items-center">
+																			{
+																				fieldValueAsTitle && fieldValueAsTitle?.length > 0 && fieldValueAsTitle?.map((asTT: any) => (
+																					<input type="hidden" name={asTT?.field_id} value={asTT?.value} />
+																				))
+																			}
+																			<input type="hidden" name="fileIdDelete" value={file?.file_id} />
+																			<input type="hidden" name={v?.field_id} value={v?.field_id} />
+																			<input type="hidden" name="deleteFile" value={'deleteFile'} />
+																			<button className="w-5 h-5 cursor-pointer"><img src={Delete} alt="file" width={'100%'} height={'100%'} /></button>
+																		</Form> : ''}
+																	</div>
+															}
+														</div>
 													))
 													: <div className="text-gray-700 w-auto h-auto text-sm rounded p-2">(No Files)</div>
 											}
@@ -345,6 +518,7 @@ export default function DrawerDetailItem() {
 
 			{loading ? <Loading /> : ''}
 			{submit ? <Loading /> : ''}
+			{!idle ? <Loading /> : ''}
 			{/* {openNewModalItem && <NewItem actionData={actionData} setHiddenModal={setHiddenCreate} />} */}
 		</>
 	)

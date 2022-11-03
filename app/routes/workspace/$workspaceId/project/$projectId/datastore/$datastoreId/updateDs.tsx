@@ -69,7 +69,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 										id='nameDsUpdate'
 										placeholder='Datastore name EN'
 										aria-invalid={actionData?.errors?.name ? true : undefined}
-										defaultValue={dsDetail?.name}
+										value={dsDetail?.name}
 									/>
 									{actionData?.errors?.name && actionData?.errors?.title === 'nameDsUpdate' && (
 										<div className='pt-1 text-red-700' id='nameDsUpdate-error'>
@@ -88,7 +88,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 										id='displayIdDsUpdate'
 										placeholder='Datastore name EN'
 										aria-invalid={actionData?.errors?.name ? true : undefined}
-										defaultValue={dsDetail?.display_id}
+										value={dsDetail?.display_id}
 									/>
 									{actionData?.errors?.name && actionData?.errors?.title === 'displayIdDsUpdate' && (
 										<div className='pt-1 text-red-700' id='displayIdDsUpdate-error'>

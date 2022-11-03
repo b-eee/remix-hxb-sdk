@@ -16,7 +16,7 @@ import { Sidebar } from "~/component/sidebar";
 
 export const meta: MetaFunction = () => {
   return {
-    title: "Workspace",
+    title: "RemixJs-Hexabase",
   };
 };
 
@@ -171,13 +171,13 @@ export default function Workspace() {
 
       <div className="flex items-center justify-center w-full bg-black text-white h-auto overflow-x-scroll scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
-          ? <div className="lg:max-w-7xl md:max-w-3xl sm:max-w-xl flex items-center justify-between h-auto w-auto">
+          ? <div className="flex items-center justify-between h-auto w-auto">
             {projects?.appAndDs?.map((project) => {
               return (
                 <NavLink key={project?.application_id} to={`${workspaceId}/project/${project?.application_id}`} onClick={() => setFocusProject(project?.application_id)}>
-                  <p className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} rounded md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
-                    {project?.name}
-                  </p>
+                  <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} rounded md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
+                    <div className="flex items-center justify-center">{project?.name}</div>
+                  </div>
                 </NavLink>
               );
             })
