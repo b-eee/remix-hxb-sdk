@@ -54,7 +54,7 @@ export default function ModalConfirmDeleteWorkspace({ setHiddenConfirm, actionDa
               <Form method="post" className="space-y-6">
                 <div>
                   <input type={'hidden'} name={'delete'} value={'delete'} />
-                  <label htmlFor="nameWsConfirmDelete" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Please input the following to confirm deletion: {data?.wsDetail?.workspace?.name} </label>
+                  <label htmlFor="nameWsConfirmDelete" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">Please input the following to confirm deletion: {data?.wsDetail?.workspace?.name} </label>
                   <input
                     autoFocus={true}
                     ref={nameWsDeleteRef}

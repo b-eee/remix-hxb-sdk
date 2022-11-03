@@ -66,7 +66,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 							<Form method='post' className='space-y-6'>
 								<input type={'hidden'} name={'update'} value={'update'} />
 								<div>
-									<label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project EN name <span className='text-red-600'>*</span></label>
+									<label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project EN name <span className='text-red-600'>*</span></label>
 									<input
 										defaultValue={projectDetail?.project?.name}
 										autoFocus={true}
@@ -88,7 +88,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 								</div>
 
 								{/* <div>
-									<label htmlFor='nameProjectJpUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project JA name <span className='text-red-600'>*</span></label>
+									<label htmlFor='nameProjectJpUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
 									<input
 										autoFocus={true}
 										ref={namePrjJARef}
@@ -109,7 +109,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 								</div> */}
 
 								<div>
-									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project JA name <span className='text-red-600'>*</span></label>
+									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
 									<input
 										defaultValue={projectDetail?.project?.display_id}
 										autoFocus={true}

@@ -21,7 +21,7 @@ export const Input = ({ id, name, refs, ariaInvalid, value, placeholder, autoFoc
             type='text'
             name={name}
             id={id}
-            className={`${className} bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5 dark:placeholder-gray-400 dark:text-white`} />
+            className={`${className} bg-gray-500 border border-gray-500 text-gray-900 text-sm rounded-lg block p-2.5 dark:placeholder-gray-400 dark:text-white`} />
         </>
           : <>
             <input

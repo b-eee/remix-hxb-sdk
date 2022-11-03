@@ -45,7 +45,7 @@ export const DrawerItemDetail = ({ onClick, isOpen, actions, fieldValue, titleIt
 								{
 									fieldValue && fieldValue?.length > 0 && fieldValue?.map((v: any) => (v?.dataType !== 'file'
 										? <div key={v?.field_id}>
-											<label htmlFor={'nameItemCreate'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">{v?.field_name}</label>
+											<label htmlFor={'nameItemCreate'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">{v?.field_name}</label>
 											<Input
 												value={v?.value ?? 'Not value'}
 												readOnly={true}
@@ -64,7 +64,7 @@ export const DrawerItemDetail = ({ onClick, isOpen, actions, fieldValue, titleIt
 											)} */}
 										</div>
 										: <div key={v?.field_id}>
-											<label htmlFor={'nameItemCreate'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">{v?.field_name}</label>
+											<label htmlFor={'nameItemCreate'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">{v?.field_name}</label>
 											<div className="overflow-y-scroll overflow-x-hidden bg-gray-200 border-2 scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200" style={{ maxHeight: 50 }}>
 												{
 													v?.value?.map((file: any) => (

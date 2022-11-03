@@ -68,7 +68,7 @@ export default function NewItem({ setHiddenModal, actionData, fieldsDs }: ModalP
 										idFields && idFields?.length > 0 && idFields?.map((idField: any) => (
 											fields && fields?.length > 0 && fields?.map((field: any) => (
 												idField == field?.field_id && field?.dataType !== 'status' && field?.dataType !== 'file' && <div key={field?.name}>
-													<label htmlFor={field?.field_id} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300 mt-2">{field?.name}</label>
+													<label htmlFor={field?.field_id} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500 mt-2">{field?.name}</label>
 													<Input
 														readOnly={false}
 														// autoFocus={true}

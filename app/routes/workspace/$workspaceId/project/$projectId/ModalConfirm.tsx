@@ -57,8 +57,8 @@ export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: Mod
               <Form method='post' className='space-y-6'>
                 <div>
                   <input type={'hidden'} name={'delete'} value={'delete'} />
-                  <p className='text-sm font-medium text-gray-900 dark:text-gray-300 pb-2'>All of the resources in the Project will be Deleted.</p>
-                  <label htmlFor='namePrjDelete' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Please input the following to confirm deletion: {projectDetail?.project?.name} </label>
+                  <p className='text-sm font-medium text-gray-900 dark:text-gray-500 pb-2'>All of the resources in the Project will be Deleted.</p>
+                  <label htmlFor='namePrjDelete' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Please input the following to confirm deletion: {projectDetail?.project?.name} </label>
                   <input
                     autoFocus={true}
                     ref={namePrjDeleteRef}

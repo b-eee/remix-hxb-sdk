@@ -106,7 +106,7 @@ export async function action({ request, params }: ActionArgs) {
 			const fieldValueItemDetail = fieldValueItemDetails?.find((v: any) => fieldValue?.display_id === v?.field_id);
 			let change;
 
-			if (fieldValue?.dataType !== 'file' && fieldValue?.dataType !== 'status' && fieldValueItemDetail?.value?.trim() !== fieldValueForm?.trim()) {
+			if (fieldValue?.dataType !== 'file' && fieldValueForm && fieldValue?.dataType !== 'status' && fieldValueItemDetail?.value?.trim() !== fieldValueForm?.trim()) {
 				change = {
 					as_title: fieldValue?.as_title,
 					cols: fieldLayout?.col,
@@ -125,7 +125,8 @@ export async function action({ request, params }: ActionArgs) {
 				}
 				changes.push(change);
 			}
-			if (fieldValue?.as_title) {
+
+			if (fieldValue?.as_title && fieldValueForm) {
 				defaultChangeIfNothingChange = change;
 			}
 
@@ -223,7 +224,7 @@ export async function action({ request, params }: ActionArgs) {
 				x: fieldLayout?.sizeX,
 				y: fieldLayout?.sizeY,
 			}
-			if (fieldValue?.as_title) {
+			if (fieldValue?.as_title && fieldValueForm) {
 				defaultChangeIfNothingChange = change;
 			}
 
@@ -382,7 +383,7 @@ export default function DrawerDetailItem() {
 							{
 								fieldValue && fieldValue?.length > 0 && fieldValue?.map((v: any) => (v?.dataType !== 'file' && v?.dataType !== 'status' &&
 									<div key={v?.field_id}>
-										<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-300 my-2">{v?.field_name}</label>
+										<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-500 my-2">{v?.field_name}</label>
 										<Input
 											value={v?.value ?? ''}
 											readOnly={inputOpen}
@@ -400,7 +401,7 @@ export default function DrawerDetailItem() {
 								files && files?.length > 0 && files?.map((v: any) => (
 									<div key={v?.field_id} className={v?.field_id}>
 										<div className="flex justify-between items-center">
-											<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-300 my-2">{v?.field_name}</label>
+											<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-500 my-2">{v?.field_name}</label>
 											{!inputOpen
 												? <>
 													<Form method="post" ref={formUploadFileRef} onSubmit={(e) => e?.preventDefault}>

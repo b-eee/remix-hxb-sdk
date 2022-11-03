@@ -1,8 +1,7 @@
-import { json } from '@remix-run/node';
 import { Form, useTransition } from '@remix-run/react';
 import React, { useState } from 'react';
-import { Loading } from '~/component/Loading';
 
+import { Loading } from '~/component/Loading';
 interface ModalProps {
 	setHiddenModal: (childData: boolean) => void;
 	actionData: any;
@@ -15,6 +14,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 	const { state } = useTransition();
 	const loading = state === 'loading';
 	const submit = state === 'submitting';
+	const [toggleState, setToggleState] = useState(1);
 
 	const sendData = () => {
 		setHiddenModal(false);
@@ -31,7 +31,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 	return (
 		<>
 			<div onClick={() => { setOpen('hidden'); sendData() }} className={`${open === 'hidden' ? '' : 'fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity'}`}></div>
-			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} w-1/3 overflow-y-auto overflow-x-hidden fixed z-50 top-1/4 right-0 left-0 ml-auto mr-auto h-auto bg-gray-400`}>
+			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} w-1/3 overflow-y-scroll border-2 scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded fixed z-50 top-10 right-0 left-0 ml-auto mr-auto h-auto bg-gray-400 max-h-full`}>
 				<div className='relative p-4 w-auto h-auto md:h-auto'>
 					<div className='relative bg-white rounded-lg shadow dark:bg-gray-700'>
 						<button
@@ -46,7 +46,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 							<Form method='post' className='space-y-6'>
 								<input type={'hidden'} name={'create'} value={'create'} />
 								<div>
-									<label htmlFor='nameProjectEnCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project EN name <span className='text-red-600'>*</span></label>
+									<label htmlFor='nameProjectEnCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project EN name <span className='text-red-600'>*</span></label>
 									<input
 										autoFocus={true}
 										ref={namePrjEnRef}
@@ -67,7 +67,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 								</div>
 
 								{/* <div>
-									<label htmlFor='nameProjectJpCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project JA name <span className='text-red-600'>*</span></label>
+									<label htmlFor='nameProjectJpCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
 									<input
 										autoFocus={true}
 										ref={namePrjJaRef}

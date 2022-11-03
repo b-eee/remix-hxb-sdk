@@ -40,13 +40,13 @@ export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsD
             <div className='py-6 px-6 lg:px-8'>
               <h3 className='box-decoration-clone bg-gradient-to-r from-indigo-600 to-pink-500 text-white rounded p-2 mb-4 text-xl font-medium mr-5 dark:text-white'>Delete datastore</h3>
               <p>Are you sure ?</p>
-              <p className='text-sm font-medium text-gray-900 dark:text-gray-300 pb-2'>Please input the following to confirm deletion: {dsDetail?.name}</p>
+              <p className='text-sm font-medium text-gray-900 dark:text-gray-500 pb-2'>Please input the following to confirm deletion: {dsDetail?.name}</p>
               <Form method='post' className='space-y-6'>
                 <div>
                   <input type={'hidden'} name={'deleteDs'} value={'deleteDs'} />
                   <input type={'hidden'} name={'nameDsDetail'} value={dsDetail?.name} />
                   <input type={'hidden'} name={'idDsDetail'} value={dsDetail?.d_id} />
-                  <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Datastore name</label>
+                  <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">Datastore name</label>
                   <Input
                   readOnly={false}
                     autoFocus={true}

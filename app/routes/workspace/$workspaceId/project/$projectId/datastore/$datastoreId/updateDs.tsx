@@ -60,7 +60,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 								<input type={'hidden'} name={'updateDs'} value={'updateDs'} />
 								<input type={'hidden'} name={'idDsDetail'} value={dsDetail?.d_id} />
 								<div>
-									<label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Project EN name <span className='text-red-600'>*</span></label>
+									<label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project EN name <span className='text-red-600'>*</span></label>
 									<Input
 										readOnly={false}
 										autoFocus={true}
@@ -79,7 +79,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 								</div>
 
 								<div>
-									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300'>Datastore ID<span className='text-red-600'>*</span></label>
+									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Datastore ID<span className='text-red-600'>*</span></label>
 									<Input
 										readOnly={false}
 										autoFocus={true}

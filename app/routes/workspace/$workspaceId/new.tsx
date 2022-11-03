@@ -42,7 +42,7 @@ export default function NewWorkspace({ setHiddenModal, actionData }: ModalProps)
 							<h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create a New Workspace</h3>
 							<Form method="post" className="space-y-6">
 								<div>
-									<label htmlFor="nameWs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Workspace name</label>
+									<label htmlFor="nameWs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">Workspace name</label>
 									<input
 										autoFocus={true}
 										ref={nameWsRef}
