@@ -10,3 +10,9 @@ node_modules
 /prisma/data.db-journal
 
 /app/styles/tailwind.css
+
+.vscode
+
+package-lock.json
+
+yarn-error.log
