@@ -1,138 +1,211 @@
 import * as React from "react";
-import { LoaderArgs, MetaFunction, redirect } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import type { LoaderArgs, MetaFunction, ActionArgs, } from "@remix-run/node";
+import { redirect, json } from "@remix-run/node";
+import { Form, Link, NavLink, Outlet, useActionData, useLoaderData, useNavigate, useParams, useTransition } from "@remix-run/react";
 import Select from 'react-tailwindcss-select';
+
 import { getUser } from "~/service/user/user.server";
-import { getCurrentWorkspace, getWorkspaces } from "~/service/workspace/workspace.server";
-import { UserInfo } from "@hexabase/hexabase-js/dist/lib/types/user";
-import { WorkspaceCurrentRes, WorkspacesRes } from "~/respone/workspace";
-import { getProject } from "~/service/project/project.server";
-import { ApplicationRes } from "~/respone/project";
+import { createWorkspace, getCurrentWorkspace, getWorkspaceDetail, getWorkspaces, setCurrentWorkspace } from "~/service/workspace/workspace.server";
+import { getProjectsAndDatastores } from "~/service/project/project.server";
+import SettingIcon from "../../public/assets/setting.svg";
+import Logout from "../../public/assets/logout.svg";
+import LogoHxb from "../../public/assets/hexabase.png";
+import Modal from "~/routes/workspace/$workspaceId/new";
+import { Loading } from "~/component/Loading";
+import { Sidebar } from "~/component/sidebar";
+
+export const meta: MetaFunction = () => {
+  return {
+    title: "RemixJs-Hexabase",
+  };
+};
 
 export async function loader({ request }: LoaderArgs) {
   let projects;
   const user = await getUser(request);
   const workspaces = await getWorkspaces(request);
   const currWs = await getCurrentWorkspace(request);
+  const wsDetail = await getWorkspaceDetail(request);
+
   if (!currWs?.error && currWs?.wsCurrent?.workspace_id) {
-    projects = await getProject(request, currWs?.wsCurrent?.workspace_id);
+    projects = await getProjectsAndDatastores(request, currWs?.wsCurrent?.workspace_id);
   }
   if (!user) return redirect("/");
-  if (!workspaces) return json([]);
-  if (!projects) return json([]);
-  return { user, workspaces, projects, currWs };
+
+  return json({ user, workspaces, projects, wsDetail });
 }
 
-export const meta: MetaFunction = () => {
-  return {
-    title: "Workspace",
-  };
-};
+export async function action({ request }: ActionArgs) {
+  const formData = await request.formData();
+  const name = formData.get("nameWs");
 
-const options = [
-  { value: "fox", label: "🦊 Fox" },
-  { value: "Butterfly", label: "🦋 Butterfly" },
-  { value: "Honeybee", label: "🐝 Honeybee" },
-];
+  if (typeof name !== "string" || name?.length === 0) {
+    return json(
+      { errors: { title: null, name: "Name is required" } },
+      { status: 400 }
+    );
+  }
+
+  if (typeof name !== "string" || name?.length === 0) {
+    return json(
+      { errors: { title: null, name: "Name is required" } },
+      { status: 400 }
+    );
+  }
+
+  const newWs = await createWorkspace(request, { name });
+
+  if (newWs?.w_id) {
+    await setCurrentWorkspace(request, { workspace_id: newWs?.w_id });
+  }
+  return redirect(`/workspace/${newWs?.w_id}`);
+}
 
 export default function Workspace() {
-  const data: {
-    user: UserInfo,
-    workspaces: WorkspacesRes,
-    projects: ApplicationRes,
-    currWs: WorkspaceCurrentRes
-  } = useLoaderData<typeof loader>();
-  console.log(data);
+  const navigate = useNavigate();
+  const { projectId } = useParams();
+  const actionData = useActionData<typeof action>();
+  const data = useLoaderData<typeof loader>();
+  const user = data?.user;
+  const workspaces = data?.workspaces;
+  const projects = data?.projects;
+  const workspaceId = data?.wsDetail?.workspace?.id;
+  const wsDetail = data?.wsDetail;
+  const { state } = useTransition();
+  const loading = state === "loading";
+  const submit = state === "submitting";
 
-  const user: UserInfo = data?.user;
-  const workspaces: WorkspacesRes = data?.workspaces;
+  const [wsSelect, setWsSelect] = React.useState<any>();
+  const [openModalCreateWs, setOpenModalCreateWs] = React.useState<boolean>(false);
+  const [hiddenDropdownSidebar, setHiddenDropdownSidebar] = React.useState<boolean>(false);
+  const [focusProject, setFocusProject] = React.useState<string | undefined>();
+
+  React.useEffect(() => {
+    if (projectId) {
+      setFocusProject(projectId);
+    } else {
+      setFocusProject(undefined);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (actionData?.errors === undefined) {
+      setOpenModalCreateWs(false);
+    }
+    if (projectId) {
+      setFocusProject(projectId);
+    } else {
+      setFocusProject(undefined);
+    }
+  }, [data]);
+
   const convertWorkspaces = () => {
-    const result: { value?: string, label?: string }[] = []
-    workspaces?.workspaces?.workspaces?.map(ws => {
-      result.push({ value: ws?.workspace_id, label: ws?.workspace_name })
+    const result: any = [
+      { value: 0, label: `+ Create workspace` }
+    ];
+    workspaces?.workspaces?.workspaces?.map((ws: any) => {
+      result.push({ value: ws?.workspace_id, label: ws?.workspace_name });
     });
     return result;
+  };
+
+  const convertWsDetail = () => {
+    let result: any = {};
+
+    if (wsDetail && wsDetail?.workspace) {
+      result = { value: wsDetail?.workspace?.id, label: wsDetail?.workspace?.name };
+    }
+    return result;
+  };
+
+  const setHiddenModal = (childData: boolean) => {
+    setOpenModalCreateWs(childData)
   }
-  const projects: ApplicationRes = data?.projects;
-  const currWs = data?.currWs?.wsCurrent?.workspace_id;
-  const [wsId, setWsId] = React.useState(null);
 
   const handleChange = (value: any) => {
-    setWsId(value);
+    if (value?.value === 0) {
+      setOpenModalCreateWs(!openModalCreateWs);
+    } else {
+      setOpenModalCreateWs(false);
+      navigate(`${value?.value}-sl`, { replace: true });
+      window.location.reload();
+    }
+    setWsSelect(value);
   };
+
   return (
-    <>
-      <header className="flex items-center justify-between bg-slate-800 p-4 text-white h-auto">
+    <div className="h-full min-h-screen w-full">
+      <nav className="flex items-center justify-between bg-slate-100 px-4 py-1 text-gray-700 max-h-16 h-auto w-auto">
         <h1 className="md:flex md:items-center md:justify-between md:w-1/6 text-3xl font-bold h-auto w-auto">
-          <Link to="/">Home</Link>
+          <div style={{minWidth: 94}} className="w-24"><Link to="/"><img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' /></Link></div>
           <div className="px-2"></div>
-          <Select
-            value={wsId ?? currWs}
-            onChange={handleChange}
-            options={convertWorkspaces()}
-            isSearchable={true}
-          />
-        </h1>
-        {
-          projects && !projects?.error && projects?.getApplications && projects?.getApplications?.length > 0 ?
-            <div>
-              {
-                projects?.getApplications?.map(project => {
-                  return (
-                    <p className="md:text-lg text-xs" key={project?.application_id}>{project?.name}</p>
-                  );
-                })
-              }
-            </div>
-            : <p className="md:text-lg text-xs">You can choose one workspace</p>
-        }
-        <Form action="/logout" method="post" className="md:flex md:items-center md:justify-between md:p-6">
-          <p className="md:text-lg text-xs">{user?.email}</p>
-          <div className="px-2"></div>
-          <button
-            type="submit"
-            className="rounded bg-slate-600 py-2 px-4 text-blue-100 hover:bg-blue-500 active:bg-blue-600"
-          >
-            Logout
-          </button>
-        </Form>
-      </header>
-
-      <main className="flex h-full bg-white">
-
-        <aside className="w-64" aria-label="Sidebar">
-          <div className="overflow-y-auto py-4 px-3 bg-gray-50 rounded dark:bg-gray-800 min-h-screen">
-            <ul className="space-y-2">
-              <li>
-                <a href="#" className="flex items-center p-2 text-base font-normal text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">
-                  <svg aria-hidden="true" className="w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
-                  <span className="ml-3">Dashboard</span>
-                </a>
-              </li>
-              <li>
-                <button type="button" className="flex items-center p-2 w-full text-base font-normal text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700" aria-controls="dropdown-example" data-collapse-toggle="dropdown-example">
-                  <svg aria-hidden="true" className="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd"></path></svg>
-                  <span className="flex-1 ml-3 text-left whitespace-nowrap" sidebar-toggle-item="">Datastore</span>
-                  <svg sidebar-toggle-item="" className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
-                </button>
-                {/* <ul id="dropdown-example" className="hidden py-2 space-y-2">
-                  <li key={}>
-
-                  </li>
-                </ul> */}
-              </li>
-            </ul>
+          <div className="min-w-full">
+            <Select
+              loading={loading}
+              value={wsSelect ?? convertWsDetail()}
+              onChange={(e) => handleChange(e)}
+              options={convertWorkspaces()}
+              isSearchable={true}
+              searchInputPlaceholder={'Input workspace name'}
+            />
           </div>
-        </aside>
+        </h1>
+        <div className="md:flex md:items-center md:justify-between">
+          <NavLink to={workspaceId ?? '/'} title={'workspace setting'} className=''>
+            <img src={SettingIcon} alt={'setting'} />
+          </NavLink>
+          <div className="flex-shrink-0 px-5 cursor-pointer">
+            <img className="h-8 w-8" src={user?.userInfo?.profile_pic} alt="avatar" />
+          </div>
+          <Form action="/logout" method="post">
+            <button
+              title="logout"
+              type="submit"
+              className="rounded active:bg-white w-8 h-8"
+            >
+              <img src={Logout} alt="logout" />
+            </button>
+          </Form>
+        </div>
+      </nav>
 
+      <div className="flex items-center justify-center w-full bg-black text-white h-auto overflow-x-scroll scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
+          ? <div className="flex items-center justify-between h-auto w-auto">
+            {projects?.appAndDs?.map((project) => {
+              return (
+                <NavLink key={project?.application_id} to={`${workspaceId}/project/${project?.application_id}`} onClick={() => setFocusProject(project?.application_id)}>
+                  <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} rounded md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
+                    <div className="flex items-center justify-center">{project?.name}</div>
+                  </div>
+                </NavLink>
+              );
+            })
+            }
+          </div>
+          : <div className="flex items-center justify-center h-auto">
+            <p className="md:text-lg text-xs">Not have project</p>
+          </div>
+        }
+      </div>
+
+      <main className="flex h-auto bg-white">
+        <Sidebar data={undefined} hiddenDropdownSidebar={hiddenDropdownSidebar} onClick={() => setHiddenDropdownSidebar} />
+
+        <div className="flex-1 p-6">
+          <Outlet />
+        </div>
       </main>
 
-      <footer className="p-4 bg-gray-400 shadow md:flex md:items-center md:justify-between md:p-6 dark:bg-gray-900 flex justify-center">
-        <span className="text-sm text-gray-500 sm:text-center dark:text-gray-400">
-          © 2022 <a href="https://en.hexabase.com/our-company/" className="hover:underline">Hexabase すごい</a>
+      <footer className="md:flex md:items-center md:justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900">
+        <span className="text-sm text-gray-800 sm:text-center dark:text-gray-400">
+          © {new Date().getFullYear()} <a href="https://en.hexabase.com/our-company/" target={"_blank"} className="hover:underline">Hexabase すごい</a>
         </span>
       </footer>
-    </>
+
+      {loading && <Loading />}
+      {submit && <Loading />}
+      {openModalCreateWs && <Modal setHiddenModal={setHiddenModal} actionData={actionData} />}
+    </div>
   );
 }

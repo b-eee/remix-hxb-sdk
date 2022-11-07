@@ -1,14 +1,15 @@
 import * as React from "react";
 import type { ActionArgs, LoaderArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, useActionData, useSearchParams, useTransition } from "@remix-run/react";
 import { createClient } from "@hexabase/hexabase-js";
 
 import { createUserSession } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
 import { UserInfo } from "~/respone/user";
 import { getUser } from "~/service/user/user.server";
-import IconHxb from "../../public/hexabaseImage.svg"
+import IconHxb from "../../public/assets/hexabaseImage.svg"
+import { Loading } from "~/component/Loading";
 
 export const meta: MetaFunction = () => {
   return {
@@ -17,9 +18,9 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderArgs) {
-  const user = await getUser(request);
-  if (user) return redirect("/");
-  return json({});
+  const user: any = await getUser(request);
+  if (user && user?.userInfo?.email) return redirect("/workspace");
+  else return json({});
 }
 
 export async function action({ request }: ActionArgs) {
@@ -53,14 +54,17 @@ export async function action({ request }: ActionArgs) {
   }
 
   const hexabase = await createClient({ url: baseUrl, token: "", email, password });
-  const user = await hexabase.auth.login({ email, password });
 
-  if (user && user?.token) {
-    const { userInfo } = await hexabase.users.get(user?.token);
-    userInfoRes = userInfo;
+  if (!hexabase) {
+    return json(
+      { errors: { email: "Invalid email or password", password: null } },
+      { status: 400 }
+    );
   }
 
-  if (!user) {
+  const { token, error } = await hexabase.auth.login({ email, password });
+
+  if (error) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 }
@@ -69,8 +73,7 @@ export async function action({ request }: ActionArgs) {
 
   return createUserSession({
     request,
-    user: userInfoRes,
-    token: user?.token,
+    token: token,
     remember: remember === "on" ? true : false,
     redirectTo,
   });
@@ -82,7 +85,9 @@ export default function LoginPage() {
   const actionData = useActionData<typeof action>();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const { state } = useTransition();
+  const loading = state === "loading";
+  const submit = state === "submitting";
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {
@@ -95,7 +100,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
-        <img src={IconHxb} alt="Hexabase Logo"/>
+        <img src={IconHxb} alt="Hexabase Logo" />
         <Form method="post" className="space-y-6 m-4">
           <div>
             <label
@@ -154,7 +159,7 @@ export default function LoginPage() {
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button
             type="submit"
-            className="w-full rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
+            className="w-full rounded bg-gradient-to-r from-green-300 via-blue-200 to-pink-300 py-2 px-4 text-white hover:bg-gradient-to-l hover:from-green-300 hover:via-pink-300 hover:to-blue-200 transition delay-150 duration-150 ease-in-out"
           >
             Log in
           </button>
@@ -188,6 +193,9 @@ export default function LoginPage() {
           </div>
         </Form>
       </div>
+
+      {loading && <Loading />}
+      {submit && <Loading />}
     </div>
   );
 }

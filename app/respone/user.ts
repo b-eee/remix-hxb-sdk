@@ -17,3 +17,8 @@ export interface UserInfo {
   is_ws_admin: string;
   user_roles: [UserRoles];
 }
+
+export interface UserInfoRes {
+  userInfo?: UserInfo;
+  error?: string;
+}
