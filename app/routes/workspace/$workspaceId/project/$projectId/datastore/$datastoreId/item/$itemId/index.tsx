@@ -178,7 +178,7 @@ export async function action({ request, params }: ActionArgs) {
 		const result = await updateItem(request, params?.projectId, params?.datastoreId, params?.itemId, itemActionParameters);
 		if (result?.error) {
 			return json(
-				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${result?.error}` } } },
+				{ resp: { data: null, errors: { title: 'InvalidValueUpdateItem', err: `${result?.error}` } } },
 				{ status: 400 }
 			);
 		}
@@ -188,7 +188,7 @@ export async function action({ request, params }: ActionArgs) {
 		const result = await deleteItem(request, params?.projectId, params?.datastoreId, params?.itemId, { a_id: actionDelete });
 		if (result?.error) {
 			return json(
-				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${result?.error}` } } },
+				{ resp: { data: null, errors: { title: 'InvalidValueDelete', err: `${result?.error}` } } },
 				{ status: 400 }
 			);
 		}
@@ -199,7 +199,7 @@ export async function action({ request, params }: ActionArgs) {
 		const resDeleteFile = await deleteFile(request, fileIdDelete);
 		if (resDeleteFile?.error) {
 			return json(
-				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${resDeleteFile?.error}` } } },
+				{ resp: { data: null, errors: { title: 'InvalidValueDeleteFile', err: `${resDeleteFile?.error}` } } },
 				{ status: 400 }
 			);
 		}
@@ -260,7 +260,7 @@ export async function action({ request, params }: ActionArgs) {
 		const res = await updateItem(request, params?.projectId, params?.datastoreId, params?.itemId, itemActionParameters);
 		if (res?.error) {
 			return json(
-				{ resp: { data: null, errors: { title: 'InvalidValue', err: `${res?.error}` } } },
+				{ resp: { data: null, errors: { title: 'InvalidValueUpdateItem', err: `${res?.error}` } } },
 				{ status: 400 }
 			);
 		}
@@ -271,7 +271,7 @@ export async function action({ request, params }: ActionArgs) {
 		if (res?.error) {
 			console.log(res?.error);
 			return json(
-				{ resp: { data: 'DownloadFileError', errors: { title: 'InvalidValue', err: `${res?.error}` } } },
+				{ resp: { data: 'DownloadFileError', errors: { title: 'InvalidValueDownloadFile', err: `${res?.error}` } } },
 				{ status: 400 }
 			);
 		}
@@ -307,7 +307,7 @@ export default function DrawerDetailItem() {
 	const [create, setCreate] = useState<any>();
 	const [copy, setCopy] = useState<any>();
 	const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
-	const [inputOpen, setInputOpen] = useState<boolean>(true);
+	const [inputReadonly, setInputReadonly] = useState<boolean>(true);
 	const [dataImageDownload, setDataImageDownload] = useState<any>();
 	const [base64UploadFiles, setBase64UploadFiles] = useState<any>('');
 
@@ -319,14 +319,13 @@ export default function DrawerDetailItem() {
 		fieldVal && fieldVal?.length > 0 && setFieldValueAsTitle(fieldVal?.filter((v: any) => (v?.field_id === 'Title')));
 		setFieldValue(fieldVal);
 	}, []);
-	// console.log('fieldValueAsTitle',fieldValueAsTitle);
 
 	useEffect(() => {
 		itemActions && itemActions?.length > 0 && itemActions?.map((v: any) => {
-			if (v?.action_name?.toLocaleLowerCase() === 'new') setCreate(v);
-			if (v?.action_name?.toLocaleLowerCase() === 'update') setUpdate(v);
-			if (v?.action_name?.toLocaleLowerCase() === 'delete') setDelete(v);
-			if (v?.action_name?.toLocaleLowerCase() === 'copy') setCopy(v);
+			if (v?.action_id?.trim() === 'CreateItem') setCreate(v);
+			if (v?.action_id?.trim() === 'UpdateItem') setUpdate(v);
+			if (v?.action_id?.trim() === 'DeleteItem') setDelete(v);
+			if (v?.action_id?.trim() === 'CopyItem') setCopy(v);
 		});
 	}, [itemActions]);
 
@@ -334,6 +333,9 @@ export default function DrawerDetailItem() {
 		const data: any = actionData?.resp?.data;
 		if (data?.file?.data) {
 			setDataImageDownload(actionData?.resp?.data);
+		}
+		if (!actionData?.resp?.errors?.err) {
+			setInputReadonly(true);
 		}
 	}, [actionData]);
 
@@ -343,11 +345,6 @@ export default function DrawerDetailItem() {
 			const realData = data.split('base64');
 			const filename = dataImageDownload?.file?.filename;
 			const contentType = dataImageDownload?.contentType;
-			// console.log('data', data);
-			// console.log('realData', realData);
-			// console.log('filename', filename);
-			// console.log('contentType', contentType);
-			// console.log('href', `data:${contentType};base64,/${realData[1] ?? data}`);
 			let a = document.body.appendChild(document.createElement("a"));
 			a.href = `data:${contentType};base64,${realData[1] ?? data}`;
 			a.download = filename;
@@ -359,9 +356,6 @@ export default function DrawerDetailItem() {
 	useEffect(() => {
 		formUploadFileRef?.current?.submit();
 	}, [base64UploadFiles])
-
-	// console.log('data', data);
-	// console.log('fieldValue', fieldValue);
 
 	const handleChangeFile = async (file: any) => {
 		setBase64UploadFiles({ type: file?.type, name: file?.name, content: await toBase64(file) });
@@ -376,7 +370,7 @@ export default function DrawerDetailItem() {
 				</div>
 				<hr className="m-0" />
 				<div className="flex h-auto w-full items-start">
-					<div className="w-3/4 border-r-2 h-full pr-4">
+					<div className="w-3/4 border-r-2 h-auto pr-4">
 						<Form method="post" encType="multipart/form-data">
 							<input type="hidden" name="actionUpdate" value={'update'} />
 							{/* field input */}
@@ -386,7 +380,7 @@ export default function DrawerDetailItem() {
 										<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-500 my-2">{v?.field_name}</label>
 										<Input
 											value={v?.value ?? ''}
-											readOnly={inputOpen}
+											readOnly={inputReadonly}
 											autoFocus={true}
 											name={v?.field_id}
 											id={v?.field_id}
@@ -402,7 +396,7 @@ export default function DrawerDetailItem() {
 									<div key={v?.field_id} className={v?.field_id}>
 										<div className="flex justify-between items-center">
 											<label htmlFor={v?.field_id} className="block text-sm font-medium text-gray-900 dark:text-gray-500 my-2">{v?.field_name}</label>
-											{!inputOpen
+											{!inputReadonly
 												? <>
 													<Form method="post" ref={formUploadFileRef} onSubmit={(e) => e?.preventDefault}>
 														{
@@ -434,7 +428,7 @@ export default function DrawerDetailItem() {
 													? v?.value?.map((file: any) => (
 														<div key={file?.file_id}>
 															{
-																inputOpen
+																inputReadonly
 																	? <Form method="post">
 																		<input type={'hidden'} name="fileId" value={file?.file_id} />
 																		<input type={'hidden'} name="contentType" value={file?.contentType} />
@@ -448,7 +442,7 @@ export default function DrawerDetailItem() {
 																		<div className="w-6 h-w-6"><img src={SelectFileIcon} alt="file" width={'100%'} height={'100%'} /></div>
 																		<div className={` w-auto h-auto text-sm rounded py-2`}>{file?.filename}</div>
 																		<div className="px-2"></div>
-																		{!inputOpen ? <Form method="post" className="flex items-center">
+																		{!inputReadonly ? <Form method="post" className="flex items-center">
 																			{
 																				fieldValueAsTitle && fieldValueAsTitle?.length > 0 && fieldValueAsTitle?.map((asTT: any) => (
 																					<input type="hidden" name={asTT?.field_id} value={asTT?.value} />
@@ -469,7 +463,7 @@ export default function DrawerDetailItem() {
 									</div>
 								))
 							}
-							{!inputOpen ? <ButtonUpdate text={'Save'} className={'float-right mt-5'} /> : ''}
+							{!inputReadonly ? <ButtonUpdate text={'Save'} className={'float-right mt-5'} /> : ''}
 						</Form>
 					</div>
 					<div className="pl-4 w-1/3">
@@ -489,7 +483,7 @@ export default function DrawerDetailItem() {
 							} */}
 							{
 								update ? <div className="my-4">
-									<ButtonUpdate text={update?.action_name} onClick={() => setInputOpen(!inputOpen)} />
+									<ButtonUpdate text={update?.action_name} onClick={() => setInputReadonly(!inputReadonly)} />
 								</div> : ''
 							}
 							{

@@ -6,7 +6,7 @@ import invariant from 'tiny-invariant';
 import { Datastores } from '@hexabase/hexabase-js/dist/lib/types/datastore';
 
 import { Loading } from '~/component/Loading';
-import { createProject, deleteProject, getDetailProject, getProjectsAndDatastores, updateProjectName } from '~/service/project/project.server';
+import { createProject, deleteProject, getDetailProject, getProjectsAndDatastores, getTemplates, updateProjectName } from '~/service/project/project.server';
 import NewProject from './new';
 import UpdateProject from './update';
 import ModalConfirmDelete from './ModalConfirm';
@@ -27,6 +27,7 @@ export async function loader({ request, params }: LoaderArgs) {
   let projectDetail;
   let datastores;
   let appAndDs;
+  const templateProjects = await getTemplates(request);
 
   if (params?.projectId && params?.workspaceId) {
     projectDetail = await getDetailProject(request, params?.projectId);
@@ -36,7 +37,7 @@ export async function loader({ request, params }: LoaderArgs) {
   if (!projectDetail || !projectDetail?.project) {
     throw new Response('Not Found', { status: 404 });
   }
-  return json({ projectDetail, datastores, appAndDs });
+  return json({ projectDetail, datastores, appAndDs, templateProjects });
 }
 
 export async function action({ request, params }: ActionArgs) {
@@ -48,6 +49,7 @@ export async function action({ request, params }: ActionArgs) {
   let projectDetail = await getDetailProject(request, params?.projectId);
   const formData = await request.formData();
   const userCurr = await getUser(request);
+  const templateProjects = await getTemplates(request);
   const payload = {
     lang_cd: DEFAULT_LANG_CD_DS,
     project_id: params?.projectId,
@@ -80,18 +82,32 @@ export async function action({ request, params }: ActionArgs) {
 
   // create project
   if (typeCreate === 'create') {
+    let tpId: any = '';
+    let cateSelectFrom: any = '';
+
+    if (templateProjects && templateProjects?.getTemplates && templateProjects?.getTemplates?.categories) {
+      templateProjects?.getTemplates?.categories?.map(v => {
+        cateSelectFrom = formData.get(v?.category)?.toString();
+      });
+      const categorySelected: any = templateProjects?.getTemplates?.categories?.find(v => v?.category === cateSelectFrom);
+      categorySelected && categorySelected?.templates && categorySelected?.templates?.map((v: any) => {
+        tpId = formData.get(v?.tp_id)?.toString();
+      });
+    }
     if (typeof nameProjectEnCreate !== 'string' || nameProjectEnCreate?.length === 0) {
       return json(
         { errors: { title: 'nameProjectEnCreate', name: 'Field is required' } },
         { status: 400 }
       );
     }
-    const newProject = await createProject(request, { name: { en: nameProjectEnCreate, ja: nameProjectEnCreate } });
+    const newProject = await createProject(request, { name: { en: nameProjectEnCreate, ja: nameProjectEnCreate }, tp_id: tpId });
     if (newProject?.error) {
       return json(
         { errors: { title: null, name: 'Data invalid' } },
         { status: 400 }
       );
+    } else {
+      return redirect(`workspace/${params?.workspaceId}/project/${newProject?.app?.project_id}`);
     }
   }
 
@@ -213,6 +229,7 @@ export default function ProjectDetailsPage() {
   const projectDetail = data?.projectDetail;
   const datastores = data?.datastores;
   const appAndDs = data?.appAndDs;
+  const templateProjects = data?.templateProjects?.getTemplates;
   const { state } = useTransition();
   const loading = state === 'loading';
   const submit = state === 'submitting';
@@ -319,7 +336,7 @@ export default function ProjectDetailsPage() {
       {loading && <Loading />}
       {submit && <Loading />}
 
-      {openNewModal && <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} />}
+      {openNewModal && <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} templateProjects={templateProjects} />}
       {openUpdateModal && <UpdateProject actionData={actionData} setHiddenModal={setHiddenUpdate} />}
       {confirm && <ModalConfirmDelete actionData={actionData} setHiddenConfirm={setHiddenConfirm} />}
 

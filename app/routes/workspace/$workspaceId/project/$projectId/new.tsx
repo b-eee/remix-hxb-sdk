@@ -1,24 +1,33 @@
 import { Form, useTransition } from '@remix-run/react';
 import React, { useState } from 'react';
+import { ButtonNew } from '~/component/button/buttonNew';
 
 import { Loading } from '~/component/Loading';
 interface ModalProps {
 	setHiddenModal: (childData: boolean) => void;
 	actionData: any;
+	templateProjects?: any;
 }
 
-export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
+export default function NewProject({ setHiddenModal, actionData, templateProjects }: ModalProps) {
 	const [open, setOpen] = useState('');
 	const namePrjEnRef = React.useRef<HTMLInputElement>(null);
 	const namePrjJaRef = React.useRef<HTMLInputElement>(null);
 	const { state } = useTransition();
 	const loading = state === 'loading';
 	const submit = state === 'submitting';
-	const [toggleState, setToggleState] = useState(1);
+	const [categorySelected, setCategorySelected] = useState<string>();
+	const [templateSelected, setTemplateSelected] = useState<string>('');
 
 	const sendData = () => {
 		setHiddenModal(false);
 	}
+
+	React.useEffect(() => {
+		if (templateProjects && templateProjects?.categories && templateProjects?.categories?.length > 0) {
+			setCategorySelected(templateProjects?.categories[0]?.category);
+		}
+	}, []);
 
 	React.useEffect(() => {
 		if (actionData?.errors?.name && actionData?.errors?.title === 'nameProjectEnCreate') {
@@ -31,7 +40,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 	return (
 		<>
 			<div onClick={() => { setOpen('hidden'); sendData() }} className={`${open === 'hidden' ? '' : 'fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity'}`}></div>
-			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} w-1/3 overflow-y-scroll border-2 scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded fixed z-50 top-10 right-0 left-0 ml-auto mr-auto h-auto bg-gray-400 max-h-full`}>
+			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} w-[50%] overflow-y-scroll border-2 scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded fixed z-50 top-10 right-0 left-0 ml-auto mr-auto h-auto bg-gray-400 max-h-full`}>
 				<div className='relative p-4 w-auto h-auto md:h-auto'>
 					<div className='relative bg-white rounded-lg shadow dark:bg-gray-700'>
 						<button
@@ -48,6 +57,7 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 								<div>
 									<label htmlFor='nameProjectEnCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project EN name <span className='text-red-600'>*</span></label>
 									<input
+										required
 										autoFocus={true}
 										ref={namePrjEnRef}
 										type='text'
@@ -65,32 +75,47 @@ export default function NewProject({ setHiddenModal, actionData }: ModalProps) {
 										</div>
 									)}
 								</div>
-
-								{/* <div>
-									<label htmlFor='nameProjectJpCreate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
-									<input
-										autoFocus={true}
-										ref={namePrjJaRef}
-										type='text'
-										name='nameProjectJpCreate'
-										id='nameProjectJpCreate'
-										className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-										placeholder='Project JA name'
-										autoComplete='nameProjectJpCreate'
-										aria-invalid={actionData?.errors?.name ? true : undefined}
-										aria-describedby='nameProjectJpCreate-error'
-									/>
-									{actionData?.errors?.name && actionData?.errors?.title === 'nameProjectJpCreate' && (
-										<div className='pt-1 text-red-700' id='email-error'>
-											{actionData?.errors?.name}
-										</div>
-									)}
-								</div> */}
-								<button
-									className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800'
-								>
-									submit
-								</button>
+								<div>Select template</div>
+								<div className='border border-gray-300 w-auto h-auto'>
+									<div className="flex items-center justify-start bg-gray-200">
+										<input type={'hidden'} name={categorySelected} value={categorySelected} />
+										{
+											templateProjects && templateProjects?.categories && templateProjects?.categories?.length > 0 && templateProjects?.categories?.map((v: any) => (
+												<div
+													key={v?.category}
+													className={`${categorySelected === v?.category ? 'text-blue-500 border-b border-blue-500' : 'text-gray-800'} py-3 px-5 cursor-pointer`}
+													onClick={() => setCategorySelected(v?.category)}
+												>
+													{v?.category}
+												</div>
+											))
+										}
+									</div>
+									<div className="p-4 grid grid-cols-3 transition-all delay-150 duration-150 ease-in-out">
+										<input type={'hidden'} name={templateSelected} value={templateSelected} />
+										{
+											templateProjects && templateProjects?.categories && templateProjects?.categories?.length > 0 && templateProjects?.categories?.map((v: any) => (
+												v?.templates && v?.templates?.length > 0 && v?.templates?.map((t: any) => (
+													<div key={t?.tp_id} className='p-1'>
+														{
+															categorySelected === v?.category
+																? <>
+																	<label htmlFor={t?.tp_id} className="cursor-pointer">
+																		<div className={`${templateSelected === t?.tp_id ? 'border-purple-600' : 'border-gray-300'} border p-3 w-auto h-auto min-h-[100px]`} onClick={() => setTemplateSelected(t?.tp_id)}>
+																			<div className={`${templateSelected === t?.tp_id ? 'text-purple-600' : 'text-gray-800'} mb-5`}>{t?.name}</div>
+																			<div className='text-gray-500 text-sm'>{t?.description}</div>
+																		</div>
+																	</label>
+																</>
+																: undefined
+														}
+													</div>
+												))
+											))
+										}
+									</div>
+								</div>
+								<ButtonNew text='Submit' />
 							</Form>
 						</div>
 					</div>
