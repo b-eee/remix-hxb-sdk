@@ -1,0 +1,84 @@
+import { Link, useLoaderData, useTransition } from "@remix-run/react";
+import { json, LoaderArgs, MetaFunction } from "@remix-run/node";
+
+import { getUser } from "~/service/user/user.server";
+import { Loading } from "~/component/Loading";
+
+export async function loader({ request }: LoaderArgs) {
+  const user: any = await getUser(request);
+  if (user) return user;
+  else return json({});
+}
+
+export const meta: MetaFunction = () => {
+  return {
+    title: "Home",
+  };
+};
+
+export default function Index() {
+  const user = useLoaderData<typeof loader>();
+  const { state } = useTransition();
+  const loading = state === "loading";
+  const submit = state === "submitting";
+
+  return (
+    <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center max-h-screen overflow-hidden">
+      <img src="https://www.hexabase.com/wp-content/uploads/2022/03/bg-2022main3.png" alt="background" className="z-0 relative" width={'100%'} height={'100%'} />
+      <div className="sm:pb-16 sm:pt-8 absolute">
+        <div className="mx-auto sm:px-6 lg:px-8">
+          <div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
+            <div className="absolute inset-0">
+              <img
+                className="h-full w-full object-cover"
+                src="https://user-images.githubusercontent.com/1500684/157774694-99820c51-8165-4908-a031-34fc371ac0d6.jpg"
+                alt="Sonic Youth On Stage"
+                width={'100%'}
+                height={'100%'}
+              />
+              <div className="absolute inset-0 bg-[color:rgba(254,204,27,0.5)] mix-blend-multiply" />
+            </div>
+            <div className="relative px-4 pt-16 pb-8 sm:px-6 sm:pt-24 sm:pb-14 lg:px-8 lg:pb-20 lg:pt-32">
+              <h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
+                <span className="block uppercase text-yellow-500 drop-shadow-md">
+                  Hexabase SDK
+                </span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-lg text-center text-xl text-white sm:max-w-3xl">
+              </p>
+              <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
+                {user && user?.userInfo?.email ? (
+                  <Link
+                    to="/workspace"
+                    className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
+                  >
+                    View workspace for {user?.userInfo?.email}
+                  </Link>
+                ) : (
+                  <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">
+                    <Link
+                      to="/login"
+                      className="flex items-center justify-center rounded-md bg-yellow-500 px-4 py-3 font-medium text-white hover:bg-yellow-600"
+                    >
+                      Log In
+                    </Link>
+                  </div>
+                )}
+              </div>
+              <a href="https://remix.run">
+                <img
+                  src="https://user-images.githubusercontent.com/1500684/158298926-e45dafff-3544-4b69-96d6-d3bcc33fc76a.svg"
+                  alt="Remix"
+                  className="mx-auto mt-16 w-full max-w-[12rem] md:max-w-[16rem]"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {loading && <Loading />}
+      {submit && <Loading />}
+    </main>
+  );
+}
