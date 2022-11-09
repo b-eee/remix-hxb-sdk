@@ -228,14 +228,12 @@ export async function action({ request, params }: ActionArgs) {
 				defaultChangeIfNothingChange = change;
 			}
 
-			if (fieldValue?.dataType === 'file' && fieldValueForm) {
-				if (fieldValueItemDetail && fieldValueItemDetail?.value && fieldValueItemDetail?.value?.length > 0) {
-					fieldValueItemDetail?.value?.map((v:any, idx: number) => {
-						if(v?.file_id === fileIdDelete) {
-							fieldValueItemDetail?.value?.splice(idx, 1); 
-						}
-					});
-				}
+			if (fieldValue?.dataType === 'file' && fieldValueForm && fieldValueItemDetail && fieldValueItemDetail?.value && fieldValueItemDetail?.value?.length > 0) {
+				fieldValueItemDetail?.value?.map((v: any, idx: number) => {
+					if (v?.file_id === fileIdDelete) {
+						fieldValueItemDetail?.value?.splice(idx, 1);
+					}
+				});
 				const change = {
 					as_title: fieldValue?.as_title,
 					cols: fieldLayout?.col,
@@ -295,7 +293,6 @@ export default function DrawerDetailItem() {
 	const { state } = useTransition();
 	const loading = state === 'loading';
 	const submit = state === 'submitting';
-	const idle = state === 'idle';
 
 	const [itemActions, setActions] = useState<any>();
 	const [fieldValue, setFieldValue] = useState<any>();
@@ -513,7 +510,6 @@ export default function DrawerDetailItem() {
 
 			{loading ? <Loading /> : ''}
 			{submit ? <Loading /> : ''}
-			{!idle ? <Loading /> : ''}
 			{/* {openNewModalItem && <NewItem actionData={actionData} setHiddenModal={setHiddenCreate} />} */}
 		</>
 	)
