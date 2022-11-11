@@ -21,7 +21,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader({ request }: LoaderArgs) {
   const user: any = await getUser(request);
-  if (user && user?.userInfo?.email) return redirect("/workspace");
+  if (user && user?.userInfo?.email) return redirect("/workspace/dashboard");
   else return json({});
 }
 
@@ -31,7 +31,7 @@ export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/workspace");
+  const redirectTo = safeRedirect(formData.get("redirectTo"), "/workspace/dashboard");
   const remember = formData.get("remember");
 
   if (!validateEmail(email)) {
@@ -83,7 +83,7 @@ export async function action({ request }: ActionArgs) {
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/workspace";
+  const redirectTo = searchParams.get("redirectTo") || "/workspace/dashboard";
   const actionData = useActionData<typeof action>();
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);

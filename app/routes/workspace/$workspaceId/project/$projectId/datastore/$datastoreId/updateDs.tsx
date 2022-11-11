@@ -86,7 +86,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 										refs={displayIdDsRef}
 										name='displayIdDsUpdate'
 										id='displayIdDsUpdate'
-										placeholder='Datastore name EN'
+										placeholder='Display ID'
 										aria-invalid={actionData?.errors?.name ? true : undefined}
 										value={dsDetail?.display_id}
 									/>

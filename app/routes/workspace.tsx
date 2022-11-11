@@ -137,7 +137,7 @@ export default function Workspace() {
     <div className="h-full min-h-screen w-full">
       <nav className="flex items-center justify-between bg-slate-100 px-4 py-1 text-gray-700 max-h-16 h-auto w-auto">
         <h1 className="md:flex md:items-center md:justify-between md:w-1/6 text-3xl font-bold h-auto w-auto">
-          <div style={{minWidth: 94}} className="w-24"><Link to="/"><img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' /></Link></div>
+          <div style={{ minWidth: 94 }} className="w-24"><NavLink to="dashboard"><img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' /></NavLink></div>
           <div className="px-2"></div>
           <div className="min-w-full">
             <Select
@@ -155,7 +155,7 @@ export default function Workspace() {
             <img src={SettingIcon} alt={'setting'} />
           </NavLink>
           <div className="flex-shrink-0 px-5 cursor-pointer">
-            <img className="h-8 w-8" src={user?.userInfo?.profile_pic} alt="avatar" />
+            <img className="h-8 w-8" src={user?.userInfo?.profile_pic ?? ''} alt="avatar" />
           </div>
           <Form action="/logout" method="post">
             <button
@@ -171,18 +171,21 @@ export default function Workspace() {
 
       <div className="flex items-center justify-center w-full bg-black text-white h-auto overflow-x-scroll scrollbar-thumb-rounded-2xl scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
-          ? <div className="flex items-center justify-between h-auto w-auto">
+          ? <>
             {projects?.appAndDs?.map((project) => {
               return (
-                <NavLink key={project?.application_id} to={`${workspaceId}/project/${project?.application_id}`} onClick={() => setFocusProject(project?.application_id)}>
-                  <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} rounded md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
-                    <div className="flex items-center justify-center">{project?.name}</div>
+                <NavLink
+                  key={project?.application_id}
+                  to={`${workspaceId}/project/${project?.application_id}`}
+                  onClick={() => setFocusProject(project?.application_id)}
+                >
+                  <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} whitespace-nowrap rounded md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
+                    {project?.name}
                   </div>
                 </NavLink>
               );
-            })
-            }
-          </div>
+            })}
+          </>
           : <div className="flex items-center justify-center h-auto">
             <p className="md:text-lg text-xs">Not have project</p>
           </div>

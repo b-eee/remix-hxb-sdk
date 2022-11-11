@@ -87,29 +87,8 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 									)}
 								</div>
 
-								{/* <div>
-									<label htmlFor='nameProjectJpUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
-									<input
-										autoFocus={true}
-										ref={namePrjJARef}
-										type='text'
-										name='nameProjectJpUpdate'
-										id='nameProjectJpUpdate'
-										className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-										placeholder='Project JA name'
-										autoComplete='nameProjectJpUpdate'
-										aria-invalid={actionData?.errors?.name ? true : undefined}
-										aria-describedby='nameProjectJpUpdate-error'
-									/>
-									{actionData?.errors?.name && actionData?.errors?.title === 'nameProjectJpUpdate' && (
-										<div className='pt-1 text-red-700' id='email-error'>
-											{actionData?.errors?.name}
-										</div>
-									)}
-								</div> */}
-
 								<div>
-									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project JA name <span className='text-red-600'>*</span></label>
+									<label htmlFor='displayIdProject' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500'>Project ID <span className='text-red-600'>*</span></label>
 									<input
 										defaultValue={projectDetail?.project?.display_id}
 										autoFocus={true}
@@ -118,7 +97,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 										name='displayIdProject'
 										id='displayIdProject'
 										className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-										placeholder='Project JA name'
+										placeholder='Project ID'
 										autoComplete='displayIdProject'
 										aria-invalid={actionData?.errors?.name ? true : undefined}
 										aria-describedby='displayIdProject-error'
