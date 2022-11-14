@@ -72,7 +72,7 @@ export default function NewWorkspace({ setHiddenModal, actionData }: ModalProps)
 				</div>
 
 				{loading && <Loading />}
-				{submit && <Loading />}
+
 			</div>
 		</>
 	);

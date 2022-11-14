@@ -10,6 +10,7 @@ import { getProjectsAndDatastores } from "~/service/project/project.server";
 import SettingIcon from "../../public/assets/setting.svg";
 import Logout from "../../public/assets/logout.svg";
 import LogoHxb from "../../public/assets/hexabase.png";
+import OptionProject from "../../public/assets/option-project.svg";
 import Modal from "~/routes/workspace/$workspaceId/new";
 import { Loading } from "~/component/Loading";
 import { Sidebar } from "~/component/sidebar";
@@ -72,10 +73,10 @@ export default function Workspace() {
   const workspaceId = data?.wsDetail?.workspace?.id;
   const wsDetail = data?.wsDetail;
   const { state } = useTransition();
-  const loading = state === "loading";
-  const submit = state === "submitting";
+  const loading = state === 'loading' || state === 'submitting';
 
   const [wsSelect, setWsSelect] = React.useState<any>();
+  const [optionProject, setOptionProject] = React.useState<boolean>(false);
   const [openModalCreateWs, setOpenModalCreateWs] = React.useState<boolean>(false);
   const [hiddenDropdownSidebar, setHiddenDropdownSidebar] = React.useState<boolean>(false);
   const [focusProject, setFocusProject] = React.useState<string | undefined>();
@@ -187,9 +188,18 @@ export default function Workspace() {
             })}
           </>
           : <div className="flex items-center justify-center h-auto">
-            <p className="md:text-lg text-xs">Not have project</p>
+            <p className="md:text-lg text-sm">Not have project</p>
           </div>
         }
+        {/* <div className="relative px-2 h-6 flex flex-col items-center justify-between cursor-pointer" onClick={() => setOptionProject(!optionProject)}>
+          <div className="rounded-full bg-white p-[2px]"></div>
+          <div className="rounded-full bg-white p-[2px]"></div>
+          <div className="rounded-full bg-white p-[2px]"></div>
+          <div className="absolute top-10 border border-gray-300 bg-gray-200" style={{zIndex: 10000}}>
+            <div className="">dsadasd</div>
+            <div className="">dasdasdsa</div>
+          </div>
+        </div> */}
       </div>
 
       <main className="flex h-auto bg-white">
@@ -207,7 +217,7 @@ export default function Workspace() {
       </footer>
 
       {loading && <Loading />}
-      {submit && <Loading />}
+
       {openModalCreateWs && <Modal setHiddenModal={setHiddenModal} actionData={actionData} />}
     </div>
   );

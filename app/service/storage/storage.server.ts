@@ -5,10 +5,11 @@ import {  USER_TOKEN } from "~/constant/user";
 import { baseUrl } from "~/constant/url";
 import { GetDownloadFileRes, ItemFileAttachmentPl, ItemFileAttachmentRes } from "@hexabase/hexabase-js/dist/lib/types/storage";
 import { ModelRes } from "@hexabase/hexabase-js/dist/lib/util/type";
+import { getTokenFromCookie } from "../helper";
 
 export async function getDownloadFile(request: Request, id: string): Promise<GetDownloadFileRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.storage.getFile(id);
@@ -18,8 +19,8 @@ export async function getDownloadFile(request: Request, id: string): Promise<Get
 }
 
 export async function createFile(request: Request, payload: ItemFileAttachmentPl): Promise<ItemFileAttachmentRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.storage.createFile(payload);
@@ -29,8 +30,8 @@ export async function createFile(request: Request, payload: ItemFileAttachmentPl
 }
 
 export async function deleteFile(request: Request, fileId: string): Promise<ModelRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
     return await hexabase.storage.delete(fileId);

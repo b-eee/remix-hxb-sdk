@@ -16,8 +16,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 	const nameDsUpdateRef = React.useRef<HTMLInputElement>(null);
 	const displayIdDsRef = React.useRef<HTMLInputElement>(null);
 	const { state } = useTransition();
-	const loading = state === 'loading';
-	const submit = state === 'submitting';
+	const loading = state === 'loading' || state === 'submitting';
 
 	const sendData = () => {
 		setHiddenModal(false);
@@ -104,7 +103,7 @@ export default function ModalUpdateDatastore({ setHiddenModal, actionData, dsDet
 				</div>
 
 				{loading && <Loading />}
-				{submit && <Loading />}
+
 			</div>
 		</>
 	);

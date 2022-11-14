@@ -88,8 +88,7 @@ export default function LoginPage() {
   const emailRef = React.useRef<HTMLInputElement>(null);
   const passwordRef = React.useRef<HTMLInputElement>(null);
   const { state } = useTransition();
-  const loading = state === "loading";
-  const submit = state === "submitting";
+  const loading = state === 'loading' || state === 'submitting';
 
   const [showPass, setShowPass] = React.useState<boolean>(false);
 
@@ -204,7 +203,7 @@ export default function LoginPage() {
       </div>
 
       {loading && <Loading />}
-      {submit && <Loading />}
+
     </div>
   );
 }

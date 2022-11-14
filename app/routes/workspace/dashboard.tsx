@@ -1,3 +1,36 @@
+const dashboardContent = [
+  {
+    title: 'Try sample app',
+    description: 'Try sample application.TODO management application is provided as a sample.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/demo',
+  },
+  {
+    title: 'Add database',
+    description: 'Create database for your application using a template.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/init',
+  },
+  {
+    title: 'Use dashboard',
+    description: 'Check the basic operation, such as workspaces, applications, and databases on the management screen.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/basic',
+  },
+  {
+    title: 'Try Hexabase CLI',
+    description: 'Try the Hexabase CLI (Command Line Interface). Learn how to develop efficiently using the CLI.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/cli',
+  },
+  {
+    title: 'Access backend via API',
+    description: 'Try Hexabase API. Learn environment and usage of API.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/api',
+  },
+  {
+    title: 'Run sample app',
+    description: 'Access Hexabase using TODO sample application.',
+    href: 'https://devdoc.hexabase.com/docs/introduction/frontend_example',
+  },
+]
+
 export default function Dashboard() {
 
   return (
@@ -39,54 +72,18 @@ export default function Dashboard() {
             <h2 className="font-bold text-lg mb-5">Steps</h2>
             <div className="text-sm font-extralight mb-5">Getting started building applications using Hexabase's development tools.</div>
             <div className="grid grid-cols-2 gap-7">
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">1</span>
-                  <div className="font-bold text-xl">Try sample app</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Try sample application.TODO management application is provided as a sample.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/demo">Learn more</a></button>
-              </div>
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">2</span>
-                  <div className="font-bold text-xl">Add database</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Create database for your application using a template.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/init">Learn more</a></button>
-              </div>
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">3</span>
-                  <div className="font-bold text-xl">Use dashboard</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Check the basic operation, such as workspaces, applications, and databases on the management screen.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/basic">Learn more</a></button>
-              </div>
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">4</span>
-                  <div className="font-bold text-xl">Try Hexabase CLI</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Try the Hexabase CLI (Command Line Interface). Learn how to develop efficiently using the CLI.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/cli">Learn more</a></button>
-              </div>
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">5</span>
-                  <div className="font-bold text-xl">Access backend via API</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Try Hexabase API. Learn environment and usage of API.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/api">Learn more</a></button>
-              </div>
-              <div className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
-                <div className="flex gap-6 items-center justify-start">
-                  <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">6</span>
-                  <div className="font-bold text-xl">Run sample app</div>
-                </div>
-                <div className="text-sm font-extralight my-5">Access Hexabase using TODO sample application.</div>
-                <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href="https://devdoc.hexabase.com/docs/introduction/frontend_example">Learn more</a></button>
-              </div>
+              {
+                dashboardContent?.map((v, idx) => (
+                  <div key={idx} className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
+                    <div className="flex gap-6 items-center justify-start">
+                      <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">{idx + 1}</span>
+                      <div className="font-bold text-xl">{v?.title}</div>
+                    </div>
+                    <div className="text-sm font-extralight my-5">{v?.description}</div>
+                    <button className="px-4 py-2 bg-black text-white cursor-pointer mt-10"><a href={v?.href} target={'_blank'}>Learn more</a></button>
+                  </div>
+                ))
+              }
             </div>
           </div>
         </div>

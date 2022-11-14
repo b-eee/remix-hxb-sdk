@@ -31,8 +31,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 	const namePrjJARef = React.useRef<HTMLInputElement>(null);
 	const displayIdPrj = React.useRef<HTMLInputElement>(null);
 	const { state } = useTransition();
-	const loading = state === 'loading';
-	const submit = state === 'submitting';
+	const loading = state === 'loading' || state === 'submitting';
 
 	const sendData = () => {
 		setHiddenModal(false);
@@ -120,7 +119,7 @@ export default function UpdateProject({ setHiddenModal, actionData }: ModalProps
 				</div>
 
 				{loading && <Loading />}
-				{submit && <Loading />}
+
 			</div>
 		</>
 	);

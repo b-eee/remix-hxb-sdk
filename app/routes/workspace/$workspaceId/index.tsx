@@ -89,8 +89,7 @@ export default function WorkspaceDetailsPage() {
   const actionData = useActionData<typeof action>();
   const wsDetail = data?.wsDetail;
   const { state } = useTransition();
-  const loading = state === "loading";
-  const submit = state === "submitting";
+  const loading = state === 'loading' || state === 'submitting';
   const nameWsUpdateRef = React.useRef<HTMLInputElement>(null);
 
   const [confirm, setConfirm] = useState<boolean>(false);
@@ -185,7 +184,7 @@ export default function WorkspaceDetailsPage() {
       </Form>
 
       {loading && <Loading />}
-      {submit && <Loading />}
+
       {confirm && <ConfirmDeleteWs actionData={actionData} setHiddenConfirm={setHiddenConfirm} />}
     </div>
   );

@@ -29,8 +29,7 @@ export default function ModalConfirmDeleteWorkspace({ setHiddenConfirm, actionDa
   const nameWsDeleteRef = React.useRef<HTMLInputElement>(null);
   const data = useLoaderData<typeof loader>();
   const { state } = useTransition();
-  const loading = state === "loading";
-  const submit = state === "submitting";
+  const loading = state === 'loading' || state === 'submitting';
 
   const sendData = () => {
     setHiddenConfirm(false);
@@ -80,7 +79,7 @@ export default function ModalConfirmDeleteWorkspace({ setHiddenConfirm, actionDa
         </div>
 
         {loading && <Loading />}
-        {submit && <Loading />}
+
       </div>
     </>
   );

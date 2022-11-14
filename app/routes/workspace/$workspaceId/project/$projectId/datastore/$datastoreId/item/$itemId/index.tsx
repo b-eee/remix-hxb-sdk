@@ -291,8 +291,7 @@ export default function DrawerDetailItem() {
 	const itemDetail = data?.itemDetail;
 	const formUploadFileRef = React.useRef<any>(null);
 	const { state } = useTransition();
-	const loading = state === 'loading';
-	const submit = state === 'submitting';
+	const loading = state === 'loading' || state === 'submitting';
 
 	const [itemActions, setActions] = useState<any>();
 	const [fieldValue, setFieldValue] = useState<any>();
@@ -366,7 +365,7 @@ export default function DrawerDetailItem() {
 					<div className="font-normal bg-sky-900 px-4 py-2 text-white rounded-lg mt-3 ">{fieldValueStatus?.map((v: any) => (v?.value))}</div>
 				</div>
 				<hr className="m-0" />
-				<div className="flex h-auto w-full items-start">
+				<div className="flex h-auto w-full items-start gap-7">
 					<div className="w-3/4 border-r-2 h-auto pr-4">
 						<Form method="post" encType="multipart/form-data">
 							<input type="hidden" name="actionUpdate" value={'update'} />
@@ -463,7 +462,7 @@ export default function DrawerDetailItem() {
 							{!inputReadonly ? <ButtonUpdate text={'Save'} className={'float-right mt-5'} /> : ''}
 						</Form>
 					</div>
-					<div className="pl-4 w-1/3">
+					<div className="w-1/3">
 						<div>
 							<h3>Item Actions</h3>
 						</div>
@@ -509,7 +508,6 @@ export default function DrawerDetailItem() {
 			</div>
 
 			{loading ? <Loading /> : ''}
-			{submit ? <Loading /> : ''}
 			{/* {openNewModalItem && <NewItem actionData={actionData} setHiddenModal={setHiddenCreate} />} */}
 		</>
 	)
