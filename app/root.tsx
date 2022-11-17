@@ -30,7 +30,7 @@ export async function loader({ request }: LoaderArgs) {
 
 export default function App() {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full scrollbar-w-1 scrollbar-thumb-gray-400 scrollbar-track-gray-200">
       <head>
         <Meta />
         <Links />

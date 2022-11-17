@@ -28,9 +28,11 @@ export async function action({ request, params }: ActionArgs) {
   invariant(params?.workspaceId, "noteId not found");
 
   let workspace_id_fist: string = '';
-  const formData = await request.formData();
-  const wsDetail = await getWorkspaceDetail(request);
-  const workspaces = await getWorkspaces(request);
+  const fetchFormData = await request.formData();
+  const fetchWsDetail = await getWorkspaceDetail(request);
+  const fetchWorkspaces = await getWorkspaces(request);
+  const [formData, wsDetail, workspaces] = await Promise.all([fetchFormData, fetchWsDetail, fetchWorkspaces]);
+
   const nameDelete = formData.get("nameWsDelete");
   const nameWsUpdate = formData.get("nameWsUpdate");
   const typeUpdate = formData.get("update");

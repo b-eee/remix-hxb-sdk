@@ -41,6 +41,7 @@ export default function NewWorkspace({ setHiddenModal, actionData }: ModalProps)
 						<div className="py-6 px-6 lg:px-8">
 							<h3 className="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create a New Workspace</h3>
 							<Form method="post" className="space-y-6">
+								<input type="hidden" name="createWs" value='createWs' />
 								<div>
 									<label htmlFor="nameWs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">Workspace name</label>
 									<input

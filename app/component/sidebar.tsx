@@ -10,7 +10,7 @@ interface Props {
 export const Sidebar = ({ onClick, hiddenDropdownSidebar, data }: Props) => {
   return (
     <>
-      <aside className="w-64" aria-label="Sidebar">
+      <aside className="w-64 md:block hidden" aria-label="Sidebar">
         <div className="overflow-y-auto py-4 px-3 bg-gray-100 dark:bg-gray-800 h-full min-h-screen">
           <ul className="space-y-2">
             <li>

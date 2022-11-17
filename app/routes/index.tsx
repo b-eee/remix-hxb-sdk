@@ -12,6 +12,7 @@ import IconHxb from "../../public/assets/hexabaseImage.svg"
 import EyeNo from "../../public/assets/eye-no-password.svg"
 import Eye from "../../public/assets/eye-password.svg"
 import { Loading } from "~/component/Loading";
+import { login } from "~/service/auth/auth.server";
 
 export const meta: MetaFunction = () => {
   return {
@@ -55,18 +56,9 @@ export async function action({ request }: ActionArgs) {
     );
   }
 
-  const hexabase = await createClient({ url: baseUrl, token: "", email, password });
+  const loginRes = await login({ email, password });
 
-  if (!hexabase) {
-    return json(
-      { errors: { email: "Invalid email or password", password: null } },
-      { status: 400 }
-    );
-  }
-
-  const { token, error } = await hexabase.auth.login({ email, password });
-
-  if (error) {
+  if (loginRes?.error) {
     return json(
       { errors: { email: "Invalid email or password", password: null } },
       { status: 400 }
@@ -75,7 +67,7 @@ export async function action({ request }: ActionArgs) {
 
   return createUserSession({
     request,
-    token: token,
+    token: loginRes?.token,
     remember: remember === "on" ? true : false,
     redirectTo,
   });
@@ -103,7 +95,9 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
-        <div className="max-w-[370px] flex justify-center items-center px-2"><img src={IconHxb} alt="Hexabase Logo" width={'100%'} height={'100%'} /></div>
+        <div className="max-w-[370px] flex justify-center items-center px-2">
+          <img src={IconHxb} alt="Hexabase Logo" width={'100%'} height={'100%'} />
+        </div>
         <Form method="post" className="space-y-6 m-4">
           <div>
             <label
@@ -132,7 +126,6 @@ export default function LoginPage() {
               )}
             </div>
           </div>
-
           <div>
             <label
               htmlFor="password"
@@ -163,7 +156,6 @@ export default function LoginPage() {
               )}
             </div>
           </div>
-
           <input type="hidden" name="redirectTo" value={redirectTo} />
           <button
             type="submit"
@@ -186,18 +178,6 @@ export default function LoginPage() {
                 Remember me?
               </label>
             </div>
-            {/* <div className="text-center text-sm text-gray-500">
-              Don't have an account?{" "}
-              <Link
-                className="text-blue-500 underline"
-                to={{
-                  pathname: "/join",
-                  search: searchParams.toString(),
-                }}
-              >
-                Sign up
-              </Link>
-            </div> */}
           </div>
         </Form>
       </div>

@@ -42,17 +42,17 @@ export default function Dashboard() {
           backgroundRepeat: 'no-repeat',
           backgroundPosition: 'center right'
         }}
-          className="text-white rounded-3xl flex items-center justify-start min-h-[172px] gap-16 mb-8"
+          className="text-white rounded-3xl md:flex md:shrink-0 items-center justify-start min-h-[172px] gap-16 mb-8"
         >
-          <h1 className="pl-8 font-bold text-3xl">
+          <h1 className="md:pl-8 md:block flex items-center justify-center font-bold text-3xl">
             Getting started
           </h1>
-          <div className="whitespace-pre-wrap text-sm font-extralight">
+          <div className="whitespace-pre-wrap text-sm font-extralight md:p-0 p-2">
             <p>Hexabase is an enterprise BaaS (Backend as a Service) for enterprise system development.</p>
             <p>It provides high-quality backend functions that can be utilized for web application development as a cloud service.</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-10 w-auto h-auto">
+        <div className="lg:grid lg:grid-cols-3 gap-10 w-auto h-auto">
           <div className="h-auto overflow-hidden rounded">
             <h2 className="font-bold text-lg mb-5">Movie</h2>
             <div className="w-auto bg-black text-white p-8 rounded h-full">
@@ -71,10 +71,10 @@ export default function Dashboard() {
           <div className="col-span-2">
             <h2 className="font-bold text-lg mb-5">Steps</h2>
             <div className="text-sm font-extralight mb-5">Getting started building applications using Hexabase's development tools.</div>
-            <div className="grid grid-cols-2 gap-7">
+            <div className="md:grid md:grid-cols-2 gap-7">
               {
                 dashboardContent?.map((v, idx) => (
-                  <div key={idx} className="p-5 border border-gray-400" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
+                  <div key={idx} className="p-5 border border-gray-400 md:max-2xl:mb-0 mb-5" style={{ boxShadow: '2px 2px 4px 2px #9e9e9e' }}>
                     <div className="flex gap-6 items-center justify-start">
                       <span className="border border-gray-800 px-3 py-1 w-auto h-auto text-center align-middle font-bold">{idx + 1}</span>
                       <div className="font-bold text-xl">{v?.title}</div>
