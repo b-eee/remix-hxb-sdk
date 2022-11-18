@@ -4,7 +4,8 @@
 - Start dev server:
   ```sh
   cp .env.example .env
-
+  
+  SESSION_SECRET="f0b0c5003a9a745c114bbdef30369146"
   config BASE_URL = "https://hxb-graph.hexabase.com/graphql"
 
   npm install
