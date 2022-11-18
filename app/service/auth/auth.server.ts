@@ -3,7 +3,7 @@ import { createClient } from "@hexabase/hexabase-js";
 
 import { getSession, sessionStorage } from "~/session.server";
 import { baseUrl } from "~/constant/url";
-import { LoginPayload, UserInfoRes } from "@hexabase/hexabase-js/dist/lib/types/user";
+import { LoginPayload } from "@hexabase/hexabase-js/dist/lib/types/user";
 import { getTokenFromCookie } from "../helper";
 import { LoginRes } from "@hexabase/hexabase-js/dist/lib/types/auth";
 

@@ -12,8 +12,6 @@ import {
   IsExistsDSDisplayIDExcludeOwnReq
 } from "@hexabase/hexabase-js/dist/lib/types/datastore";
 
-import { getSession } from "~/session.server";
-import { USER_TOKEN } from "~/constant/user";
 import { baseUrl } from "~/constant/url";
 import { getTokenFromCookie } from "../helper";
 

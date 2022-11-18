@@ -29,31 +29,15 @@ Firstly, create auth services to handle `login`, `logout` or `register`
 For example, add `login` function, after create token in session.
 
 ```tsx
-const baseUrl = process.env.BASE_URL || "https://hxb-graph.hexabase.com/graphql";
-const hexabase = await createClient({ url: baseUrl, token: "", email, password });
-
-if (!hexabase) {
-  return json(
-    { errors: { email: "Invalid email or password", password: null } },
-    { status: 400 }
-  );
+export async function login(loginInput: LoginPayload): Promise<LoginRes | undefined> {
+  const hexabase = await createClient({ url: baseUrl, token: '', email: loginInput?.email, password: loginInput?.password });
+  const loginRes = await hexabase.auth.login(loginInput);
+  if (loginRes?.token) {
+    return loginRes;
+  } else {
+    return undefined;
+  }
 }
-
-const { token, error } = await hexabase.auth.login({ email, password });
-
-if (error) {
-  return json(
-    { errors: { email: "Invalid email or password", password: null } },
-    { status: 400 }
-  );
-}
-
-return createUserSession({
-  request,
-  token: token,
-  remember: remember === "on" ? true : false,
-  redirectTo,
-});
 ```
 
 ![An image from the static](/public/assets/image/login.png)
@@ -80,11 +64,11 @@ import { WorkspaceDetailRes, WorkspaceIDRes, WorkspaceSettingReq } from "@hexaba
 import { ModelRes, ResponseErrorNull } from "@hexabase/hexabase-js/dist/lib/util/type";
 
 export async function getWorkspaces(request: Request): Promise<WorkspacesRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.workspaces.get();
+    return await hexabase.workspace.get();
   } else {
     return undefined;
   }
@@ -97,11 +81,11 @@ Let's pass the `current_workspace_id` to `getProjectsAndDatastores` api to get a
 //project.server.ts
 
 export async function getProjectsAndDatastores(request: Request, workspaceId: string): Promise<AppAndDsRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.applications.getProjectsAndDatastores(workspaceId);
+    return await hexabase.project.getProjectsAndDatastores(workspaceId);
   } else {
     return undefined;
   }
@@ -116,12 +100,11 @@ You can create a new _`workspace`_
 //workspace.server.ts
 
 export async function createWorkspace(request: Request, createWsInput: CreateWsInput): Promise<WorkspaceIDRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
 
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.workspaces.create(createWsInput);
+    return await hexabase.workspace.create(createWsInput);
   } else {
     return undefined;
   }
@@ -136,11 +119,11 @@ Or create a new _`application`_ in current workspace
 //application.server.ts
 
 export async function createProject(request: Request, createProjectParams: CreateProjectPl): Promise<CreateAppRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.applications.create(createProjectParams);
+    return await hexabase.project.create(createProjectParams);
   } else {
     return undefined;
   }
@@ -164,22 +147,22 @@ import { CreateNewItemPl, DeleteItemReq, DsItemsRes, GetItemDetailPl, GetItemsPl
 import { ModelRes } from "@hexabase/hexabase-js/dist/lib/util/type";
 
 export async function getItems(request: Request, params: GetItemsPl, datastoreId: string, projectId?: string): Promise<DsItemsRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.items.get(params, datastoreId, projectId);
+    return await hexabase.item.get(params, datastoreId, projectId);
   } else {
     return undefined;
   }
 }
 
 export async function getItemDetail(request: Request, datastoreId: string, itemId: string, projectId?: string, itemDetailParams?: GetItemDetailPl): Promise<ItemDetailRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.items.getItemDetail(datastoreId, itemId, projectId, itemDetailParams);
+    return await hexabase.item.getItemDetail(datastoreId, itemId, projectId, itemDetailParams);
   } else {
     return undefined;
   }
@@ -192,11 +175,11 @@ After get items from a datastore by call `getItems` function, you should call `g
 //datastore.server.ts
 
 export async function getFields(request: Request, datastoreId: string, projectId: string): Promise<DatastoreGetFieldsRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.getFields(datastoreId, projectId);
+    return await hexabase.datastore.getFields(datastoreId, projectId);
   } else {
     return undefined;
   }
@@ -218,11 +201,11 @@ You can delete an item
 //item.server.ts
 
 export async function deleteItem(request: Request, projectId: string, datastoreId: string, itemId: string, deleteItemReq: DeleteItemReq): Promise<ModelRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.items.delete(projectId, datastoreId, itemId, deleteItemReq);
+    return await hexabase.item.delete(projectId, datastoreId, itemId, deleteItemReq);
   } else {
     return undefined;
   }
@@ -234,11 +217,11 @@ or add an item
 
 ```tsx
 export async function createItem(request: Request, projectId: string, datastoreId: string, newItemPl: CreateNewItemPl): Promise<ItemDetailRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.items.create(projectId, datastoreId, newItemPl);
+    return await hexabase.item.create(projectId, datastoreId, newItemPl);
   } else {
     return undefined;
   }
@@ -285,11 +268,11 @@ Edit item
 
 ```tsx
 export async function updateItem(request: Request, projectId: string, datastoreId: string, itemId: string, itemActionParameters: ItemActionParameters): Promise<ItemDetailRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.items.update(projectId, datastoreId, itemId, itemActionParameters);
+    return await hexabase.item.update(projectId, datastoreId, itemId, itemActionParameters);
   } else {
     return undefined;
   }
