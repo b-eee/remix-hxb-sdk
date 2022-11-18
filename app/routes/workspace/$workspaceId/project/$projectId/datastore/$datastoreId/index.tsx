@@ -105,8 +105,8 @@ export default function ItemDetailsPage() {
   const fieldsDs = data?.fieldsDs;
   const items = data?.items;
   const { state } = useTransition();
-  const loading = state === 'loading';
-  const submit = state === 'submitting';
+  const loading = state === 'loading' || state === 'submitting';
+  
 
   const [dsSelect, setDsSelect] = React.useState<any>();
   const [fields, setFields] = useState<any>();
@@ -218,7 +218,7 @@ export default function ItemDetailsPage() {
       </table>
 
       {loading && <Loading />}
-      {submit && <Loading />}
+
 
       {openNewModalItem && <NewItem actionData={actionData} setHiddenModal={setHiddenCreate} fieldsDs={fieldsDs} />}
     </>

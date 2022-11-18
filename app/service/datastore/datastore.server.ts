@@ -15,90 +15,91 @@ import {
 import { getSession } from "~/session.server";
 import { USER_TOKEN } from "~/constant/user";
 import { baseUrl } from "~/constant/url";
+import { getTokenFromCookie } from "../helper";
 
 export async function getDatastore(request: Request, projectId: string): Promise<DatastoreRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.get(projectId);
+    return await hexabase.datastore.get(projectId);
   } else {
     return undefined;
   }
 }
 
 export async function getDetailDatastore(request: Request, datastoreId: string): Promise<DatastoreSettingRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.getDetail(datastoreId);
+    return await hexabase.datastore.getDetail(datastoreId);
   } else {
     return undefined;
   }
 }
 
 export async function createDatastore(request: Request, payload: CreateDatastoreFromSeedReq): Promise<CreateDatastoreFromSeedRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.create(payload);
+    return await hexabase.datastore.create(payload);
   } else {
     return undefined;
   }
 }
 
 export async function validateDatastoreDisplayID(request: Request, payload: IsExistsDSDisplayIDExcludeOwnReq): Promise<ExistsDSDisplayIDExcludeOwnRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.validateDatastoreDisplayID(payload);
+    return await hexabase.datastore.validateDatastoreDisplayID(payload);
   } else {
     return undefined;
   }
 }
 
 export async function updateDatastore(request: Request, payload: DatastoreUpdateSetting): Promise<ModelRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.updateDatastoreSetting(payload);
+    return await hexabase.datastore.updateDatastoreSetting(payload);
   } else {
     return undefined;
   }
 }
 
 export async function deleteDatastore(request: Request, datastoreId: string): Promise<ModelRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.deleteDatastore(datastoreId);
+    return await hexabase.datastore.deleteDatastore(datastoreId);
   } else {
     return undefined;
   }
 }
 
 export async function getFields(request: Request, datastoreId: string, projectId: string): Promise<DatastoreGetFieldsRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.getFields(datastoreId, projectId);
+    return await hexabase.datastore.getFields(datastoreId, projectId);
   } else {
     return undefined;
   }
 }
 
 export async function getActions(request: Request, datastoreId: string): Promise<DsActionRes | undefined> {
-  const session = await getSession(request);
-  const token = session.get(USER_TOKEN);
+  const token = await getTokenFromCookie(request);
+  
   if (token) {
     const hexabase = await createClient({ url: baseUrl, token, email: '', password: '' });
-    return await hexabase.datastores.getActions(datastoreId);
+    return await hexabase.datastore.getActions(datastoreId);
   } else {
     return undefined;
   }

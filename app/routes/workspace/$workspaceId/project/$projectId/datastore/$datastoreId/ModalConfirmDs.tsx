@@ -17,8 +17,8 @@ export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsD
   const [open, setOpen] = useState('');
   const nameDsDeleteRef = React.useRef<HTMLInputElement>(null);
   const { state } = useTransition();
-  const loading = state === 'loading';
-  const submit = state === 'submitting';
+  const loading = state === 'loading' || state === 'submitting';
+  
 
   const sendData = () => {
     setHiddenConfirm(false);
@@ -48,7 +48,7 @@ export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsD
                   <input type={'hidden'} name={'idDsDetail'} value={dsDetail?.d_id} />
                   <label htmlFor={'nameDsDelete'} className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-500">Datastore name</label>
                   <Input
-                  readOnly={false}
+                    readOnly={false}
                     autoFocus={true}
                     refs={nameDsDeleteRef}
                     name='nameDsDelete'
@@ -62,14 +62,14 @@ export default function ModalConfirmDeleteDs({ setHiddenConfirm, actionData, dsD
                     </div>
                   )}
                 </div>
-                <ButtonDelete text='delete'/>
+                <ButtonDelete text='delete' />
               </Form>
             </div>
           </div>
         </div>
 
         {loading && <Loading />}
-        {submit && <Loading />}
+
       </div>
     </>
   );

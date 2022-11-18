@@ -231,8 +231,8 @@ export default function ProjectDetailsPage() {
   const appAndDs = data?.appAndDs;
   const templateProjects = data?.templateProjects?.getTemplates;
   const { state } = useTransition();
-  const loading = state === 'loading';
-  const submit = state === 'submitting';
+  const loading = state === 'loading' || state === 'submitting';
+  
 
   const [openNewModal, setOpenNewModal] = useState<boolean>(false);
   const [openUpdateModal, setOpenUpdateModal] = useState<boolean>(false);
@@ -334,7 +334,7 @@ export default function ProjectDetailsPage() {
       />
 
       {loading && <Loading />}
-      {submit && <Loading />}
+
 
       {openNewModal && <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} templateProjects={templateProjects} />}
       {openUpdateModal && <UpdateProject actionData={actionData} setHiddenModal={setHiddenUpdate} />}

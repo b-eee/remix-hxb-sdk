@@ -15,8 +15,7 @@ export default function NewItem({ setHiddenModal, actionData, fieldsDs }: ModalP
 	const namePrjEnRef = React.useRef<HTMLInputElement>(null);
 	const namePrjJaRef = React.useRef<HTMLInputElement>(null);
 	const { state } = useTransition();
-	const loading = state === 'loading';
-	const submit = state === 'submitting';
+	const loading = state === 'loading' || state === 'submitting';
 
 	const [open, setOpen] = useState('');
 	const [idFields, setIdFields] = useState<any>();
@@ -90,7 +89,7 @@ export default function NewItem({ setHiddenModal, actionData, fieldsDs }: ModalP
 				</div>
 
 				{loading && <Loading />}
-				{submit && <Loading />}
+
 			</div>
 		</>
 	);

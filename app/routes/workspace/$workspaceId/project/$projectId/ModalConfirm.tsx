@@ -32,8 +32,8 @@ export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: Mod
   const namePrjDeleteRef = React.useRef<HTMLInputElement>(null);
   const { projectDetail } = useLoaderData<typeof loader>();
   const { state } = useTransition();
-  const loading = state === 'loading';
-  const submit = state === 'submitting';
+  const loading = state === 'loading' || state === 'submitting';
+  
 
   const sendData = () => {
     setHiddenConfirm(false);
@@ -77,14 +77,14 @@ export default function ModalConfirmDelete({ setHiddenConfirm, actionData }: Mod
                     </div>
                   )}
                 </div>
-                <ButtonDelete text='Delete'/>
+                <ButtonDelete text='Delete' />
               </Form>
             </div>
           </div>
         </div>
 
         {loading && <Loading />}
-        {submit && <Loading />}
+
       </div>
     </>
   );

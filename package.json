@@ -29,7 +29,7 @@
     "/public/build"
   ],
   "dependencies": {
-    "@hexabase/hexabase-js": "^1.0.18",
+    "@hexabase/hexabase-js": "^1.1.0",
     "@remix-run/node": "^1.7.2",
     "@remix-run/react": "^1.7.2",
     "@remix-run/serve": "^1.7.2",

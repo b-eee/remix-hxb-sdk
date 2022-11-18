@@ -56,6 +56,9 @@ return createUserSession({
 ```
 
 ![An image from the static](/public/assets/image/login.png)
+## Login successfully
+
+![An image from the static](/public/assets/image/login-successful.png)
 
 ## Fetching data
 

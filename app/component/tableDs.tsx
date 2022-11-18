@@ -18,8 +18,8 @@ interface Props {
 export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, appAndDs }: Props) => {
   let lengthDs = 0;
   const { state } = useTransition();
-  const loading = state === 'loading';
-  const submit = state === 'submitting';
+  const loading = state === 'loading' || state === 'submitting';
+  
   const params = useParams();
 
   if (appAndDs && appAndDs?.appAndDs && appAndDs?.appAndDs?.length > 0) {
@@ -36,7 +36,7 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, a
         <div className="flex items-center justify-between">
           {
             lengthDs >= 5
-              ? <div className="p-5 bg-green-300 text-base font-semibold text-red-400">
+              ? <div className="p-5 bg-green-300 text-base font-semibold text-red-400 rounded-md">
                 Cannot create a new database, the limit has been exceeded.
               </div>
               : <div></div>
@@ -85,7 +85,7 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, a
       </div>
 
       {loading && <Loading />}
-      {submit && <Loading />}
+      
     </>
   )
 };

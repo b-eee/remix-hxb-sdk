@@ -14,8 +14,7 @@ export default function NewProject({ setHiddenModal, actionData, templateProject
 	const namePrjEnRef = React.useRef<HTMLInputElement>(null);
 	const namePrjJaRef = React.useRef<HTMLInputElement>(null);
 	const { state } = useTransition();
-	const loading = state === 'loading';
-	const submit = state === 'submitting';
+	const loading = state === 'loading' || state === 'submitting';
 	const [categorySelected, setCategorySelected] = useState<string>();
 	const [templateSelected, setTemplateSelected] = useState<string>('');
 
@@ -96,20 +95,18 @@ export default function NewProject({ setHiddenModal, actionData, templateProject
 										{
 											templateProjects && templateProjects?.categories && templateProjects?.categories?.length > 0 && templateProjects?.categories?.map((v: any) => (
 												v?.templates && v?.templates?.length > 0 && v?.templates?.map((t: any) => (
-													<div key={t?.tp_id} className='p-1'>
-														{
-															categorySelected === v?.category
-																? <>
-																	<label htmlFor={t?.tp_id} className="cursor-pointer">
-																		<div className={`${templateSelected === t?.tp_id ? 'border-purple-600' : 'border-gray-300'} border p-3 w-auto h-auto min-h-[100px]`} onClick={() => setTemplateSelected(t?.tp_id)}>
-																			<div className={`${templateSelected === t?.tp_id ? 'text-purple-600' : 'text-gray-800'} mb-5`}>{t?.name}</div>
-																			<div className='text-gray-500 text-sm'>{t?.description}</div>
-																		</div>
-																	</label>
-																</>
-																: undefined
-														}
-													</div>
+													categorySelected === v?.category
+														? <div key={t?.tp_id} className='p-1'>
+															{
+																<label htmlFor={t?.tp_id} className="cursor-pointer">
+																	<div className={`${templateSelected === t?.tp_id ? 'border-purple-600' : 'border-gray-300'} border p-3 w-auto h-auto min-h-[100px]`} onClick={() => setTemplateSelected(t?.tp_id)}>
+																		<div className={`${templateSelected === t?.tp_id ? 'text-purple-600' : 'text-gray-800'} mb-5`}>{t?.name}</div>
+																		<div className='text-gray-500 text-xs'>{t?.description}</div>
+																	</div>
+																</label>
+															}
+														</div>
+														: null
 												))
 											))
 										}
@@ -122,7 +119,7 @@ export default function NewProject({ setHiddenModal, actionData, templateProject
 				</div>
 
 				{loading && <Loading />}
-				{submit && <Loading />}
+
 			</div>
 		</>
 	);
