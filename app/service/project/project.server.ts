@@ -1,7 +1,5 @@
 import { createClient } from '@hexabase/hexabase-js';
 
-import { getSession } from '~/session.server';
-import { USER_TOKEN } from '~/constant/user';
 import { baseUrl } from '~/constant/url';
 import { AppAndDsRes, CreateAppRes, CreateProjectPl, DeleteProjectPl, ProjectInfoRes, TemplateRes, UpdateProjectNamePl } from '@hexabase/hexabase-js/dist/lib/types/project';
 import { ModelRes } from '@hexabase/hexabase-js/dist/lib/util/type';

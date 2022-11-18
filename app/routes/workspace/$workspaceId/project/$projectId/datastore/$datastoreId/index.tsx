@@ -166,7 +166,7 @@ export default function ItemDetailsPage() {
     <>
       <div className='flex justify-between'>
         <div className='flex justify-start'>
-          <h3 className='text-2xl font-bold'>Datastore Select:</h3>
+          <h3 className='text-2xl font-bold'>Datastore:</h3>
           <div className="min-w-min ml-4">
             <Select
               loading={loading}

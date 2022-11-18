@@ -1,6 +1,5 @@
 import { DatastoreRes, Datastores } from "@hexabase/hexabase-js/dist/lib/types/datastore";
-import { AppAndDsRes } from "@hexabase/hexabase-js/dist/lib/types/application";
-import { redirect } from "@remix-run/node";
+import { AppAndDsRes } from "@hexabase/hexabase-js/dist/lib/types/project";
 
 import Plus from "../../public/assets/plus.svg";
 import { Form, Link, useParams, useTransition } from "@remix-run/react";
@@ -36,7 +35,7 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, a
         <div className="flex items-center justify-between">
           {
             lengthDs >= 5
-              ? <div className="p-5 bg-green-300 text-base font-semibold text-red-400 rounded-md">
+              ? <div className="p-5 bg-green-200 text-base font-semibold text-red-500 rounded-md">
                 Cannot create a new database, the limit has been exceeded.
               </div>
               : <div></div>
@@ -69,8 +68,8 @@ export const TableDataStore = ({ data, onClickDeleteModal, onClickUpdateModal, a
                     <td className="text-xs text-gray-70 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">{index + 1}</td>
                     <td className="text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-400 py-4 px-6"> <Link to={`datastore/${ds?.d_id}`} className='lg:text-sm text-blue-400 hover:underline hover:decoration-blue-400'>{ds?.name}</Link></td>
                     <td className="text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-400 py-4 px-6">{ds?.display_id}</td>
-                    <td className="py-4 px-6 dark:bg-gray-700 dark:text-gray-400 flex items-center justify-start w-auto">
-                      <ButtonUpdate onClick={() => onClickUpdateModal(ds)} text={'Update'} className='mx-4' />
+                    <td className="py-4 px-6 dark:bg-gray-700 dark:text-gray-400 flex items-center justify-start w-auto gap-2">
+                      <ButtonUpdate onClick={() => onClickUpdateModal(ds)} text={'Update'} />
                       <ButtonDelete onClick={() => onClickDeleteModal(ds)} text={'Delete'} />
                     </td>
                   </tr>

@@ -11,6 +11,7 @@ import SettingIcon from "../../public/assets/setting.svg";
 import Logout from "../../public/assets/logout.svg";
 import LogoHxb from "../../public/assets/hexabase.png";
 import Home from "../../public/assets/home.svg";
+import MenuMobileIcon from "../../public/assets/menu-icon-mobile.svg";
 import PlusWhiteOutline from "../../public/assets/plus-white-outline.svg";
 import Modal from "~/routes/workspace/$workspaceId/new";
 import { Loading } from "~/component/Loading";
@@ -244,15 +245,14 @@ export default function Workspace() {
 
   return (
     <div className="h-full min-h-screen w-full">
-      <nav className="flex items-center justify-between bg-slate-100 px-4 py-1 text-gray-700 max-h-16 h-auto w-auto">
-        <div className="flex items-center md:justify-between md:w-1/6 text-3xl font-bold h-auto w-auto">
-          <div className="md:hidden block w-8 rounded h-full bg-black" onClick={() => setIsOpen(!isOpen)}>
-            <svg className="block h-8 w-8 fill-white" xmlns="http://www.w3.org/2000/svg" fill="#fff" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" fill="#fff" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
+      <nav className="flex items-center justify-between bg-slate-100 px-2 py-1 text-gray-700 max-h-16 h-auto w-auto">
+        <div className="flex items-center md:justify-between text-3xl font-bold h-auto w-auto gap-2">
+          <img className="md:hidden block" src={MenuMobileIcon} alt="menuMobile" width={'100%'} height={'100%'} onClick={() => setIsOpen(!isOpen)} />
+          <div className="w-0 md:block hidden transform min-w-[94px]">
+            <NavLink to="dashboard">
+              <img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' />
+            </NavLink>
           </div>
-          <div style={{ minWidth: 94 }} className="w-24 md:block hidden"><NavLink to="dashboard"><img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' /></NavLink></div>
-          <div className="px-2"></div>
           <div className="min-w-full w-auto">
             <Select
               loading={loading}
@@ -264,13 +264,20 @@ export default function Workspace() {
             />
           </div>
         </div>
-        <div style={{ minWidth: 94 }} className="w-24 md:hidden"><NavLink to="dashboard"><img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' /></NavLink></div>
-        <div className="flex items-center justify-between">
+        <div className="w-24 md:opacity-0 min-w-[94px] opacity-100 transition-all ease-in-out duration-700 delay-2">
+          <NavLink to="dashboard">
+            <img src={LogoHxb} alt="logo_hexabase" width='100%' height='100%' />
+          </NavLink>
+        </div>
+        <NavLink to={workspaceId ?? '/'} title={'workspace setting'} className='md:hidden block'>
+            <img src={SettingIcon} alt={'setting'} />
+          </NavLink>
+        <div className="md:flex hidden items-center justify-between gap-3">
           <NavLink to={workspaceId ?? '/'} title={'workspace setting'} className=''>
             <img src={SettingIcon} alt={'setting'} />
           </NavLink>
-          <div className="flex-shrink-0 px-5 cursor-pointer">
-            <img className="h-8 w-8" src={user?.userInfo?.profile_pic ?? ''} alt="avatar" />
+          <div className="flex-shrink-0 cursor-pointer rounded-full">
+            <img className="h-8 w-8" src={user?.userInfo?.profile_pic ?? ''} alt="avatar" width='100%' height='100%' />
           </div>
           <Form action="/logout" method="post">
             <button
@@ -285,7 +292,7 @@ export default function Workspace() {
       </nav>
 
       <div className="relative flex flex-1 items-center justify-between w-full bg-black text-white">
-        <div className="w-[36px] h-full flex items-center justify-center mr-2 cursor-pointer">
+        <div className="md:w-[36px] w-10 h-full flex items-center justify-center px-1 cursor-pointer">
           <Link to={"dashboard"}><img src={Home} alt="home" width='100%' height='100%' /></Link>
         </div>
         <div className="grow relative overflow-hidden h-9 flex">
@@ -349,14 +356,14 @@ export default function Workspace() {
         </div>
       </div>
 
-      <main className="flex h-auto bg-white">
+      <main className="md:flex h-auto bg-white">
         <Sidebar data={undefined} hiddenDropdownSidebar={hiddenDropdownSidebar} onClick={() => setHiddenDropdownSidebar(!hiddenDropdownSidebar)} />
         <div className="flex-1 p-6">
           <Outlet />
         </div>
       </main>
 
-      <footer className="md:flex md:items-center md:justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900">
+      <footer className="flex items-center justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900 w-full h-auto">
         <span className="text-sm text-gray-800 sm:text-center dark:text-gray-400">
           © {new Date().getFullYear()} <a href="https://en.hexabase.com/our-company/" target={"_blank"} className="hover:underline">Hexabase すごい</a>
         </span>
@@ -365,7 +372,7 @@ export default function Workspace() {
       {loading ? <Loading /> : null}
       {openNewModal ? <NewProject actionData={actionData} setHiddenModal={setHiddenCreate} templateProjects={templateProjects} /> : null}
       {openModalCreateWs ? <Modal setHiddenModal={setHiddenModal} actionData={actionData} /> : null}
-      {isOpen ? <MenuMobile isOpen={isOpen} onClick={() => setIsOpen(!isOpen)}  /> : null}
+      {isOpen ? <MenuMobile isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} /> : null}
     </div>
   );
 }
