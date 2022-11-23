@@ -25,7 +25,7 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
-  invariant(params?.workspaceId, "noteId not found");
+  invariant(params?.workspaceId, "workspaceId not found");
 
   let workspace_id_fist: string = '';
   const fetchFormData = await request.formData();
