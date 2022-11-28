@@ -1,12 +1,22 @@
-# remix-hxb-sdk
+# RemixJs-hxb-sdk
 ## Development
 
-- Start dev server:
+ Start dev server:
   ```sh
+  1. Setup file .env
+
   cp .env.example .env
+
+  or
+
+  yarn copy:env
+
+  2. Config file .env
   
   SESSION_SECRET="f0b0c5003a9a745c114bbdef30369146"
-  config BASE_URL = "https://hxb-graph.hexabase.com/graphql"
+  BASE_URL = "https://hxb-graph.hexabase.com/graphql"
+
+  3. Run example
 
   npm install
   npm run dev

@@ -44,27 +44,17 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
-
   let projects;
-  let application_id_fist: string = '';
   let newWs;
-  const fetchProjectDetail = getDetailProject(request, params?.projectId!);
   const fetchFormData = request.formData();
   const fetchTemplateProjects = getTemplates(request);
   const fetchCurrWs = getCurrentWorkspace(request);
-  let [projectDetail, formData, templateProjects, currWs] = await Promise.all([fetchProjectDetail, fetchFormData, fetchTemplateProjects, fetchCurrWs]);
+  let [formData, templateProjects, currWs] = await Promise.all([fetchFormData, fetchTemplateProjects, fetchCurrWs]);
 
   const createWs = formData.get('createWs');
   const name = formData.get("nameWs");
-
   const nameProjectEnCreate = formData.get('nameProjectEnCreate');
-  const nameProjectEnUpdate = formData.get('nameProjectEnUpdate');
-  const displayIdProject = formData.get('displayIdProject');
-  const namePrjDelete = formData.get('namePrjDelete');
-
   const typeCreate = formData.get('create');
-  const typeUpdate = formData.get('update');
-  const typeDelete = formData.get('delete');
 
   if (params?.workspaceId) {
     projects = await getProjectsAndDatastores(request, params?.workspaceId);
@@ -270,8 +260,8 @@ export default function Workspace() {
           </NavLink>
         </div>
         <NavLink to={workspaceId ?? '/'} title={'workspace setting'} className='md:hidden block'>
-            <img src={SettingIcon} alt={'setting'} />
-          </NavLink>
+          <img src={SettingIcon} alt={'setting'} />
+        </NavLink>
         <div className="md:flex hidden items-center justify-between gap-3">
           <NavLink to={workspaceId ?? '/'} title={'workspace setting'} className=''>
             <img src={SettingIcon} alt={'setting'} />
@@ -313,24 +303,23 @@ export default function Workspace() {
           >
             {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
               ? <>
-                {projects?.appAndDs?.map((project) => {
-                  return (
-                    <div
+                {projects?.appAndDs?.map((project) => (
+                  <div
+                    key={project?.application_id}
+                    className="carousel-item text-center relative w-auto h-auto snap-start"
+                  >
+                    <NavLink
                       key={project?.application_id}
-                      className="carousel-item text-center relative w-auto h-auto snap-start"
+                      to={`${workspaceId}/project/${project?.application_id}`}
+                      onClick={() => setFocusProject(project?.application_id)}
                     >
-                      <NavLink
-                        key={project?.application_id}
-                        to={`${workspaceId}/project/${project?.application_id}`}
-                        onClick={() => setFocusProject(project?.application_id)}
-                      >
-                        <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} whitespace-nowrap md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
-                          {project?.name}
-                        </div>
-                      </NavLink>
-                    </div>
-                  );
-                })}
+                      <div className={`${focusProject === project?.application_id ? "bg-yellow-100 text-gray-700" : ''} whitespace-nowrap md:text-sm text-xs hover:bg-yellow-100 hover:text-gray-700 px-4 py-2 cursor-pointer dark:hover:bg-white dark:hover:text-gray-800`}>
+                        {project?.name}
+                      </div>
+                    </NavLink>
+                  </div>
+                )
+                )}
               </>
               : <div className="flex items-center justify-center h-auto">
                 <p className="md:text-lg text-sm">Not have project</p>

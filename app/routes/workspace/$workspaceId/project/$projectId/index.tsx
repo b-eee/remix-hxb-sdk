@@ -301,37 +301,33 @@ export default function ProjectDetailsPage() {
       </div>
       <hr className='my-4' />
       <div className='md:flex gap-5 grid grid-cols-2 items-center justify-start my-7'>
-        <div>
-          <div className='py-3'>
-            <label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800'>Project name</label>
-            <input
-              readOnly={true}
-              value={projectDetail?.project?.name ?? undefined}
-              type='text'
-              name='nameProjectEnUpdate'
-              id='nameProjectEnUpdate'
-              className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-            />
-          </div>
-          <div className='py-3'>
-            <input type={'hidden'} name={'update'} value={'update'} />
-            <label htmlFor='displayId' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800'>Project ID</label>
-            <input
-              readOnly={true}
-              value={projectDetail?.project?.display_id ?? undefined}
-              type='text'
-              name='displayId'
-              id='displayId'
-              className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
-            />
-          </div>
+        <div className='py-3'>
+          <label htmlFor='nameProjectEnUpdate' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800'>Project name</label>
+          <input
+            readOnly={true}
+            value={projectDetail?.project?.name ?? undefined}
+            type='text'
+            name='nameProjectEnUpdate'
+            id='nameProjectEnUpdate'
+            className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+          />
         </div>
-        <div>
-          <div className='md:hidden grid grid-rows-3 gap-2'>
-            <ButtonNew onClick={() => { setOpenNewModal(!openNewModal), setOpenUpdateModal(false), setConfirm(false) }} text={'New'} />
-            <ButtonUpdate onClick={() => { setOpenUpdateModal(!openUpdateModal), setOpenNewModal(false), setConfirm(false) }} text={'Update'} />
-            <ButtonDelete onClick={() => { setConfirm(!confirm), setOpenUpdateModal(false), setOpenNewModal(false) }} text={'Delete'} />
-          </div>
+        <div className='py-3'>
+          <input type={'hidden'} name={'update'} value={'update'} />
+          <label htmlFor='displayId' className='block mb-2 text-sm font-medium text-gray-900 dark:text-gray-800'>Project ID</label>
+          <input
+            readOnly={true}
+            value={projectDetail?.project?.display_id ?? undefined}
+            type='text'
+            name='displayId'
+            id='displayId'
+            className='bg-gray-300 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white'
+          />
+        </div>
+        <div className='md:hidden grid grid-rows-3 gap-2'>
+          <ButtonNew onClick={() => { setOpenNewModal(!openNewModal), setOpenUpdateModal(false), setConfirm(false) }} text={'New'} />
+          <ButtonUpdate onClick={() => { setOpenUpdateModal(!openUpdateModal), setOpenNewModal(false), setConfirm(false) }} text={'Update'} />
+          <ButtonDelete onClick={() => { setConfirm(!confirm), setOpenUpdateModal(false), setOpenNewModal(false) }} text={'Delete'} />
         </div>
       </div>
       <TableDataStore

@@ -43,7 +43,7 @@ export default function NewItem({ setHiddenModal, actionData, fieldsDs }: ModalP
 	return (
 		<>
 			<div onClick={() => { setOpen('hidden'); sendData() }} className={`${open === 'hidden' ? '' : 'fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity'}`}></div>
-			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} w-1/3 overflow-y-auto overflow-x-hidden fixed z-50 top-5 right-0 left-0 ml-auto mr-auto h-auto bg-gray-400`}>
+			<div id='authentication-modal' tabIndex={-1} aria-hidden='true' className={`${open} md:w-2/3 lg:w-1/3 overflow-y-auto overflow-x-hidden fixed z-50 inset-0 m-auto max-h-max h-auto bg-gray-400`}>
 				<div className='relative p-4 w-auto h-auto md:h-auto'>
 					<div className='relative bg-white rounded-lg shadow dark:bg-gray-700'>
 						<button
