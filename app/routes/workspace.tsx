@@ -111,6 +111,7 @@ export async function action({ request, params }: ActionArgs) {
 
 export default function Workspace() {
   const navigate = useNavigate();
+  const params = useParams();
   const { projectId } = useParams();
   const actionData = useActionData<typeof action>();
   const data = useLoaderData<typeof loader>();
@@ -181,7 +182,7 @@ export default function Workspace() {
     } else {
       setOpenModalCreateWs(false);
       navigate(`${value?.value}-sl`, { replace: true });
-      window.location.reload();
+      // window.location.reload();
     }
     setWsSelect(value);
   };
@@ -299,7 +300,7 @@ export default function Workspace() {
           </button>
           <div
             ref={carousel}
-            className="carousel-container relative flex flex-auto items-center justify-between overflow-hidden scroll-smooth snap-x snap-mandatory touch-pan-x z-0"
+            className={`carousel-container relative flex flex-auto items-center ${projects?.appAndDs && projects?.appAndDs?.length > 5 ? 'justify-between' : 'justify-center'} overflow-hidden scroll-smooth snap-x snap-mandatory touch-pan-x z-0`}
           >
             {projects && !projects?.error && projects?.appAndDs && projects?.appAndDs?.length > 0
               ? <>
@@ -347,9 +348,11 @@ export default function Workspace() {
 
       <main className="md:flex h-auto bg-white">
         <Sidebar data={undefined} hiddenDropdownSidebar={hiddenDropdownSidebar} onClick={() => setHiddenDropdownSidebar(!hiddenDropdownSidebar)} />
-        <div className="flex-1 p-6">
-          <Outlet />
-        </div>
+        {params?.projectId
+          ? <div className="flex-1 p-6">
+            <Outlet />
+          </div>
+          : <div className="font-bold text-base text-gray-700 m-5">Please select project</div>}
       </main>
 
       <footer className="flex items-center justify-center md:p-6 p-4 bg-gray-400 shadow dark:bg-gray-900 w-full h-auto">
